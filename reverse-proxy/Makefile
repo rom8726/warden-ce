@@ -28,26 +28,26 @@ docker-build: ## Сборка Docker-образа
 .PHONY: docker-push
 docker-push: docker-build ## Тегирование и пуш Docker-образа
 	@echo "\nTagging Docker image..."
-	@docker tag warden-reverse-proxy:latest $(DOCKER_REGISTRY)/warden-reverse-proxy:latest
+	@docker tag warden-reverse-proxy:latest $(DOCKER_REGISTRY)/rom8726/warden-reverse-proxy:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Tagging FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@echo "\nPushing Docker image to Docker Registry..."
-	@docker push $(DOCKER_REGISTRY)/warden-reverse-proxy:latest
+	@docker push $(DOCKER_REGISTRY)/rom8726/warden-reverse-proxy:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Push FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@if [ -n "$(TOOL_VERSION)" ] && [ "$(TOOL_VERSION)" != "latest" ]; then \
 		echo "\nTagging Docker image with version $(TOOL_VERSION)..."; \
-		docker tag warden-reverse-proxy:latest $(DOCKER_REGISTRY)/warden-reverse-proxy:$(TOOL_VERSION); \
+		docker tag warden-reverse-proxy:latest $(DOCKER_REGISTRY)/rom8726/warden-reverse-proxy:$(TOOL_VERSION); \
 		                if [ $$? -ne 0 ] ; then \
                         echo -e ${RED}"Version tagging FAILED"${NOCOLOR} ; \
                         exit 1 ; \
                 fi; \
                 echo "\nPushing Docker image with version $(TOOL_VERSION) to Docker Registry..."; \
-                docker push $(DOCKER_REGISTRY)/warden-reverse-proxy:$(TOOL_VERSION); \
+                docker push $(DOCKER_REGISTRY)/rom8726/warden-reverse-proxy:$(TOOL_VERSION); \
                 if [ $$? -ne 0 ] ; then \
                         echo -e ${RED}"Version push FAILED"${NOCOLOR} ; \
 			exit 1 ; \

@@ -69,26 +69,26 @@ docker-build: ## Сборка универсального Docker-образа
 .PHONY: docker-push
 docker-push: docker-build ## Тегирование и пуш Docker-образа
 	@echo "\nTagging Docker image..."
-	@docker tag warden-frontend:latest $(DOCKER_REGISTRY)/warden-frontend:latest
+	@docker tag warden-frontend:latest $(DOCKER_REGISTRY)/rom8726/warden-frontend:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Tagging FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@echo "\nPushing Docker image to Docker Registry..."
-	@docker push $(DOCKER_REGISTRY)/warden-frontend:latest
+	@docker push $(DOCKER_REGISTRY)/rom8726/warden-frontend:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Push FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@if [ -n "$(VITE_VERSION)" ] && [ "$(VITE_VERSION)" != "latest" ]; then \
 		echo "\nTagging Docker image with version $(VITE_VERSION)..."; \
-		docker tag warden-frontend:latest $(DOCKER_REGISTRY)/warden-frontend:$(VITE_VERSION); \
+		docker tag warden-frontend:latest $(DOCKER_REGISTRY)/rom8726/warden-frontend:$(VITE_VERSION); \
 		                if [ $$? -ne 0 ] ; then \
                         echo -e ${RED}"Version tagging FAILED"${NOCOLOR} ; \
                         exit 1 ; \
                 fi; \
                 echo "\nPushing Docker image with version $(VITE_VERSION) to Docker Registry..."; \
-                docker push $(DOCKER_REGISTRY)/warden-frontend:$(VITE_VERSION); \
+                docker push $(DOCKER_REGISTRY)/rom8726/warden-frontend:$(VITE_VERSION); \
                 if [ $$? -ne 0 ] ; then \
                         echo -e ${RED}"Version push FAILED"${NOCOLOR} ; \
 			exit 1 ; \
