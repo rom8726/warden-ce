@@ -191,7 +191,7 @@ jobs:
   build-envelope-consumer:
     name: Build envelope consumer
     runs-on: ubuntu-22.04
-    needs: test
+    needs: build-backend
     if: ${{ github.event.inputs.build_envelope_consumer != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
     steps:
       - name: Checkout code
@@ -231,7 +231,7 @@ jobs:
   build-ingest-server:
     name: Build ingest server
     runs-on: ubuntu-22.04
-    needs: test
+    needs: build-envelope-consumer
     if: ${{ github.event.inputs.build_ingest_server != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
     steps:
       - name: Checkout code
@@ -271,7 +271,7 @@ jobs:
   build-issue-notificator:
     name: Build issue notificator
     runs-on: ubuntu-22.04
-    needs: test
+    needs: build-ingest-server
     if: ${{ github.event.inputs.build_issue_notificator != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
     steps:
       - name: Checkout code
@@ -311,7 +311,7 @@ jobs:
   build-user-notificator:
     name: Build user notificator
     runs-on: ubuntu-22.04
-    needs: test
+    needs: build-issue-notificator
     if: ${{ github.event.inputs.build_user_notificator != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
     steps:
       - name: Checkout code
@@ -351,7 +351,7 @@ jobs:
   build-scheduler:
     name: Build scheduler
     runs-on: ubuntu-22.04
-    needs: test
+    needs: build-user-notificator
     if: ${{ github.event.inputs.build_scheduler != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
     steps:
       - name: Checkout code
@@ -391,7 +391,7 @@ jobs:
   build-pgbouncer:
     name: Build PgBouncer
     runs-on: ubuntu-22.04
-    needs: test
+    needs: build-scheduler
     if: ${{ github.event.inputs.build_pgbouncer != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
     steps:
       - name: Checkout code
@@ -431,7 +431,7 @@ jobs:
   build-frontend:
     name: Build Frontend
     runs-on: ubuntu-22.04
-    needs: test
+    needs: build-pgbouncer
     if: ${{ github.event.inputs.build_frontend != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
     steps:
       - name: Checkout code
@@ -472,7 +472,7 @@ jobs:
   build-reverse-proxy:
     name: Build Reverse Proxy
     runs-on: ubuntu-22.04
-    needs: test
+    needs: build-frontend
     if: ${{ github.event.inputs.build_reverse_proxy != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
     steps:
       - name: Checkout code
