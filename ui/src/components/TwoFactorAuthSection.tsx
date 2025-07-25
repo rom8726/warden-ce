@@ -211,7 +211,7 @@ const TwoFactorAuthSection: React.FC<TwoFactorAuthSectionProps> = ({ userData, u
 
           {/* Модалка для включения 2FA */}
           <Dialog open={openSetup} onClose={handleCloseSetup} maxWidth="xs" fullWidth>
-            <DialogTitle>Enable Two-Factor Authentication</DialogTitle>
+            <DialogTitle className="gradient-text">Enable Two-Factor Authentication</DialogTitle>
             <DialogContent>
               {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
               {success && <Alert severity="success" sx={{ mb: 2 }}>2FA enabled!</Alert>}
@@ -314,7 +314,7 @@ const TwoFactorAuthSection: React.FC<TwoFactorAuthSectionProps> = ({ userData, u
 
           {/* Модалка для отключения 2FA */}
           <Dialog open={openDisable} onClose={handleCloseDisable} maxWidth="xs" fullWidth>
-            <DialogTitle>Disable Two-Factor Authentication</DialogTitle>
+            <DialogTitle className="gradient-text">Disable Two-Factor Authentication</DialogTitle>
             <DialogContent>
               {disableError && <Alert severity="error" sx={{ mb: 2 }}>{disableError}</Alert>}
               {disableSuccess && <Alert severity="success" sx={{ mb: 2 }}>2FA disabled!</Alert>}

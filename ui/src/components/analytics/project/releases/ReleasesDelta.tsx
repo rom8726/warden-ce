@@ -256,7 +256,7 @@ const ReleasesDelta: React.FC<ReleasesDeltaProps> = ({
 
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h6" gutterBottom className="gradient-subtitle-green">
         Release Comparison: {compareRelease} → {selectedRelease}
       </Typography>
 
@@ -285,12 +285,7 @@ const ReleasesDelta: React.FC<ReleasesDeltaProps> = ({
           }} />
         </Box>
         <CardContent sx={{ position: 'relative', zIndex: 1 }}>
-          <Typography variant="h6" gutterBottom sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            color: getDeltaCardTextColor(),
-            fontWeight: 600
-          }}>
+          <Typography variant="h6" gutterBottom sx={{}} className="gradient-subtitle-green">
             <CompareArrowsIcon sx={{ mr: 1 }} />
             Releases Delta Analysis
           </Typography>

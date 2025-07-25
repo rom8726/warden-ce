@@ -284,7 +284,7 @@ const SettingsPage: React.FC = () => {
         }}
         aria-labelledby="leave-team-dialog-title"
       >
-        <DialogTitle id="leave-team-dialog-title">
+        <DialogTitle id="leave-team-dialog-title" className="gradient-text">
           Leave Team
         </DialogTitle>
         <DialogContent>

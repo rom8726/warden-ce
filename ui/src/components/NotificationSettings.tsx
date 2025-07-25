@@ -1115,7 +1115,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ projectId }
 
       {/* Add/Edit Setting Dialog */}
       <Dialog open={openSettingDialog} onClose={() => setOpenSettingDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
+        <DialogTitle className="gradient-text-purple">
           {settingDialogMode === 'add' ? 'Add Notification Channel' : 'Edit Notification Channel'}
         </DialogTitle>
         <DialogContent>
@@ -1167,7 +1167,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ projectId }
 
       {/* Add/Edit Rule Dialog */}
       <Dialog open={openRuleDialog} onClose={() => setOpenRuleDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>
+        <DialogTitle className="gradient-text-purple">
           {ruleDialogMode === 'add' ? 'Add Notification Rule' : 'Edit Notification Rule'}
         </DialogTitle>
         <DialogContent>
@@ -1235,7 +1235,7 @@ const NotificationSettings: React.FC<NotificationSettingsProps> = ({ projectId }
 
       {/* Validation Error Dialog */}
       <Dialog open={openValidationDialog} onClose={() => setOpenValidationDialog(false)}>
-        <DialogTitle>Validation Error</DialogTitle>
+        <DialogTitle className="gradient-text-purple">Validation Error</DialogTitle>
         <DialogContent>
           <Typography>{validationError}</Typography>
         </DialogContent>

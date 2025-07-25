@@ -36,7 +36,7 @@ const CreateTeamDialog: React.FC<CreateTeamDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={handleCancel}>
-      <DialogTitle>Create New Team</DialogTitle>
+      <DialogTitle className="gradient-text-purple">Create New Team</DialogTitle>
       <DialogContent>
         <DialogContentText>
           Enter the name for the new team.

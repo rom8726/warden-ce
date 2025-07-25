@@ -58,7 +58,7 @@ const ReleasesTable: React.FC<ReleasesTableProps> = ({
   if (loading) {
     return (
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }} className="gradient-subtitle-green">
           <AssessmentIcon sx={{ mr: 1 }} />
           Release Summary
         </Typography>
@@ -72,7 +72,7 @@ const ReleasesTable: React.FC<ReleasesTableProps> = ({
   if (error) {
     return (
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }} className="gradient-subtitle-green">
           <AssessmentIcon sx={{ mr: 1 }} />
           Release Summary
         </Typography>
@@ -86,7 +86,7 @@ const ReleasesTable: React.FC<ReleasesTableProps> = ({
   if (!releases || releases.length === 0) {
     return (
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+        <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }} className="gradient-subtitle-green">
           <AssessmentIcon sx={{ mr: 1 }} />
           Release Summary
         </Typography>
@@ -99,7 +99,7 @@ const ReleasesTable: React.FC<ReleasesTableProps> = ({
 
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
-      <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
+      <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }} className="gradient-subtitle-green">
         <AssessmentIcon sx={{ mr: 1 }} />
         Release Summary
       </Typography>
