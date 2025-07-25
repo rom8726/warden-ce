@@ -1,0 +1,11 @@
+{{ define "pachca" }}
+**[{{.ProjectName}}] {{.IssueTitle}}>**
+**<Is Regress:>** {{if .IsRegress}}Yes{{else}}No{{end}}
+**<Level:>** {{.IssueLevel}}
+**<First Seen:>** {{.FirstSeen}}
+**<Last Seen:>** {{.LastSeen}}
+**<Status:>** {{.IssueStatus}}
+**<Platform:>** {{.IssuePlatform}}
+**<Occurrences:>** {{.IssueOccurrences}}
+**<URL:>** {{.IssueURL}}
+{{ end }}

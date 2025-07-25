@@ -1,0 +1,373 @@
+- name: get project stats with 10m period
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_project_stats_10m
+      request:
+        method: GET
+        path: /api/v1/projects/1/stats?period=10m
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "total_issues": 0,
+            "issues_by_level": {
+              "fatal": 0,
+              "exception": 0,
+              "error": 0,
+              "warning": 0,
+              "info": 0,
+              "debug": 0
+            },
+            "most_frequent_issues": []
+          }
+
+- name: get project stats with 30m period
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_project_stats_30m
+      request:
+        method: GET
+        path: /api/v1/projects/1/stats?period=30m
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "total_issues": 1,
+            "issues_by_level": {
+              "fatal": 0,
+              "exception": 0,
+              "error": 0,
+              "warning": 1,
+              "info": 0,
+              "debug": 0
+            },
+            "most_frequent_issues": "<<PRESENCE>>"
+          }
+
+- name: get project stats with 1h period
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_project_stats_1h
+      request:
+        method: GET
+        path: /api/v1/projects/1/stats?period=1h
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "total_issues": 2,
+            "issues_by_level": {
+              "fatal": 0,
+              "exception": 0,
+              "error": 1,
+              "warning": 1,
+              "info": 0,
+              "debug": 0
+            },
+            "most_frequent_issues": "<<PRESENCE>>"
+          }
+
+- name: get project stats with 3h period
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_project_stats_3h
+      request:
+        method: GET
+        path: /api/v1/projects/1/stats?period=3h
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "total_issues": 3,
+            "issues_by_level": {
+              "fatal": 0,
+              "exception": 0,
+              "error": 2,
+              "warning": 1,
+              "info": 0,
+              "debug": 0
+            },
+            "most_frequent_issues": "<<PRESENCE>>"
+          }
+
+- name: get project stats with 6h period
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_project_stats_6h
+      request:
+        method: GET
+        path: /api/v1/projects/1/stats?period=6h
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "total_issues": 3,
+            "issues_by_level": {
+              "fatal": 0,
+              "exception": 0,
+              "error": 2,
+              "warning": 1,
+              "info": 0,
+              "debug": 0
+            },
+            "most_frequent_issues": "<<PRESENCE>>"
+          }
+
+- name: get project stats with 12h period
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_project_stats_12h
+      request:
+        method: GET
+        path: /api/v1/projects/1/stats?period=12h
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "total_issues": 3,
+            "issues_by_level": {
+              "fatal": 0,
+              "exception": 0,
+              "error": 2,
+              "warning": 1,
+              "info": 0,
+              "debug": 0
+            },
+            "most_frequent_issues": "<<PRESENCE>>"
+          }
+
+- name: get project stats with 3d period
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_project_stats_3d
+      request:
+        method: GET
+        path: /api/v1/projects/1/stats?period=3d
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "total_issues": 3,
+            "issues_by_level": {
+              "fatal": 0,
+              "exception": 0,
+              "error": 2,
+              "warning": 1,
+              "info": 0,
+              "debug": 0
+            },
+            "most_frequent_issues": "<<PRESENCE>>"
+          }
+
+- name: get project stats with 14d period
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_project_stats_14d
+      request:
+        method: GET
+        path: /api/v1/projects/1/stats?period=14d
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "total_issues": 3,
+            "issues_by_level": {
+              "fatal": 0,
+              "exception": 0,
+              "error": 2,
+              "warning": 1,
+              "info": 0,
+              "debug": 0
+            },
+            "most_frequent_issues": "<<PRESENCE>>"
+          }
+
+- name: get project stats without period parameter
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_project_stats_default
+      request:
+        method: GET
+        path: /api/v1/projects/1/stats
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400
+
+- name: get project stats with invalid period
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_project_stats_invalid_period
+      request:
+        method: GET
+        path: /api/v1/projects/1/stats?period=invalid
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400

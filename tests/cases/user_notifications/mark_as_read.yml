@@ -1,0 +1,111 @@
+- name: success mark notification as read
+  fixtures:
+    - empty_db
+    - user_notifications
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: mark_notification_as_read
+      request:
+        method: PUT
+        path: /api/v1/notifications/1/read
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT is_read FROM user_notifications WHERE id = 1
+          result:
+            - is_read: true
+
+- name: mark non-existent notification as read
+  fixtures:
+    - empty_db
+    - user_notifications
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: mark_nonexistent_notification_as_read
+      request:
+        method: PUT
+        path: /api/v1/notifications/999/read
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "get notification by ID: entity not found"
+            }
+          }
+
+- name: mark notification as read without auth
+  fixtures:
+    - empty_db
+    - user_notifications
+
+  steps:
+    - name: mark_notification_as_read_unauthorized
+      request:
+        method: PUT
+        path: /api/v1/notifications/1/read
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: mark notification as read with invalid id
+  fixtures:
+    - empty_db
+    - user_notifications
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: mark_notification_as_read_invalid_id
+      request:
+        method: PUT
+        path: /api/v1/notifications/invalid/read
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400 

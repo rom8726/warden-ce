@@ -1,0 +1,74 @@
+- name: get recent issues with default limit
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: get_recent_issues
+      request:
+        method: GET
+        path: /api/v1/issues/recent?limit=5
+        headers:
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "issues": [
+              {
+                "id": 1,
+                "project_id": 1,
+                "title": "TypeError: Cannot read property of undefined",
+                "level": "error",
+                "count": 15,
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 2,
+                "project_id": 1,
+                "title": "ReferenceError: variable is not defined",
+                "level": "error",
+                "count": 8,
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 3,
+                "project_id": 1,
+                "title": "Warning: Deprecated function used",
+                "level": "warning",
+                "count": 3,
+                "last_seen": "<<PRESENCE>>"
+              }
+            ]
+          }
+
+- name: get recent issues without auth
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: get_recent_issues_unauthorized
+      request:
+        method: GET
+        path: /api/v1/issues/recent?limit=5
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }

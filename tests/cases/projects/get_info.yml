@@ -1,0 +1,189 @@
+- name: success project info received
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_info
+      request:
+        method: GET
+        path: /api/v1/projects/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "project": {
+              "id": 1,
+              "name": "Project1",
+              "public_key": "418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1",
+              "description": "Some project",
+              "team_id": 1,
+              "team_name": "developers",
+              "created_at": "<<PRESENCE>>"
+            }
+          }
+
+- name: try to get project info without permissions
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"dev4", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_info
+      request:
+        method: GET
+        path: /api/v1/projects/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "permission denied"
+            }
+          }
+
+- name: get project info without auth
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: get_info_unauthorized
+      request:
+        method: GET
+        path: /api/v1/projects/1
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: get non-existent project info
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_info_not_found
+      request:
+        method: GET
+        path: /api/v1/projects/999
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+
+- name: get project info for project without team
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_info
+      request:
+        method: GET
+        path: /api/v1/projects/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "project": {
+              "id": 1,
+              "name": "Project Without Team",
+              "public_key": "418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1",
+              "description": "Some project",
+              "created_at": "<<PRESENCE>>"
+            }
+          }
+
+- name: get project info with invalid project id
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_info_invalid_id
+      request:
+        method: GET
+        path: /api/v1/projects/invalid
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400

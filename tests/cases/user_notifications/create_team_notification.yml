@@ -1,0 +1,98 @@
+- name: success create team notification
+  fixtures:
+    - empty_db
+    - single_team_with_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_member
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":2, "role":"member"}
+      response:
+        status: 201
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM user_notifications WHERE user_id = 2 AND type = 'team_added'
+          result:
+            - cnt: 1
+        - query: SELECT is_read FROM user_notifications WHERE user_id = 2 AND type = 'team_added'
+          result:
+            - is_read: false
+
+- name: create team notification for non-existent user
+  fixtures:
+    - empty_db
+    - single_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_nonexistent_user
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":999, "role":"member"}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM user_notifications WHERE user_id = 999
+          result:
+            - cnt: 0
+
+- name: create team notification without auth
+  fixtures:
+    - empty_db
+    - single_team_with_users
+
+  steps:
+    - name: add_member_unauthorized
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+        body: {"user_id":2, "role":"member"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM user_notifications WHERE user_id = 2
+          result:
+            - cnt: 0 

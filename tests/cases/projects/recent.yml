@@ -1,0 +1,122 @@
+- name: recent projects with activity and no-team
+  fixtures:
+    - empty_db
+    - recent_projects_activity
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_recent_projects
+      request:
+        method: GET
+        path: /api/v1/projects/recent
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          [
+            {"id": 1, "name": "AlphaProject", "description": "Some project", "team_id": 1, "team_name": "team_alpha", "public_key": "1111111111111111111111111111111111111111111111111111111111111111", "created_at": "<<PRESENCE>>"},
+            {"id": 6, "name": "ZetaProject", "description": "Some project", "public_key": "6666666666666666666666666666666666666666666666666666666666666666", "created_at": "<<PRESENCE>>"},
+            {"id": 2, "name": "BetaProject", "description": "Some project", "team_id": 2, "team_name": "team_beta", "public_key": "2222222222222222222222222222222222222222222222222222222222222222", "created_at": "<<PRESENCE>>"},
+            {"id": 3, "name": "GammaProject", "description": "Some project", "team_id": 1, "team_name": "team_alpha", "public_key": "3333333333333333333333333333333333333333333333333333333333333333", "created_at": "<<PRESENCE>>"},
+            {"id": 4, "name": "DeltaProject", "description": "Some project", "team_id": 2, "team_name": "team_beta", "public_key": "4444444444444444444444444444444444444444444444444444444444444444", "created_at": "<<PRESENCE>>"}
+          ]
+
+- name: recent projects for regular user with no-team
+  fixtures:
+    - empty_db
+    - recent_projects_activity
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_recent_projects_user
+      request:
+        method: GET
+        path: /api/v1/projects/recent
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          [
+            {"id": 1, "name": "AlphaProject", "description": "Some project", "team_id": 1, "team_name": "team_alpha", "public_key": "1111111111111111111111111111111111111111111111111111111111111111", "created_at": "<<PRESENCE>>"},
+            {"id": 6, "name": "ZetaProject", "description": "Some project", "public_key": "6666666666666666666666666666666666666666666666666666666666666666", "created_at": "<<PRESENCE>>"},
+            {"id": 3, "name": "GammaProject", "description": "Some project", "team_id": 1, "team_name": "team_alpha", "public_key": "3333333333333333333333333333333333333333333333333333333333333333", "created_at": "<<PRESENCE>>"},
+            {"id": 5, "name": "EpsilonProject", "description": "Some project", "public_key": "5555555555555555555555555555555555555555555555555555555555555555", "created_at": "<<PRESENCE>>"},
+            {"id": 7, "name": "OmegaProject", "description": "Some project", "public_key": "7777777777777777777777777777777777777777777777777777777777777777", "created_at": "<<PRESENCE>>"}
+          ]
+
+- name: recent projects no activity with no-team
+  fixtures:
+    - empty_db
+    - recent_projects_no_activity
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_recent_projects
+      request:
+        method: GET
+        path: /api/v1/projects/recent
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          [
+            {"id": 1, "name": "AlphaProject", "description": "Some project", "team_id": 1, "team_name": "team_alpha", "public_key": "1111111111111111111111111111111111111111111111111111111111111111", "created_at": "<<PRESENCE>>"},
+            {"id": 2, "name": "BetaProject", "description": "Some project", "team_id": 2, "team_name": "team_beta", "public_key": "2222222222222222222222222222222222222222222222222222222222222222", "created_at": "<<PRESENCE>>"},
+            {"id": 4, "name": "DeltaProject", "description": "Some project", "team_id": 2, "team_name": "team_beta", "public_key": "4444444444444444444444444444444444444444444444444444444444444444", "created_at": "<<PRESENCE>>"},
+            {"id": 5, "name": "EpsilonProject", "description": "Some project", "public_key": "5555555555555555555555555555555555555555555555555555555555555555", "created_at": "<<PRESENCE>>"},
+            {"id": 3, "name": "GammaProject", "description": "Some project", "team_id": 1, "team_name": "team_alpha", "public_key": "3333333333333333333333333333333333333333333333333333333333333333", "created_at": "<<PRESENCE>>"}
+          ]
+
+
+- name: recent projects unauthorized
+  fixtures:
+    - empty_db
+    - recent_projects_activity
+  steps:
+    - name: get_recent_projects_unauth
+      request:
+        method: GET
+        path: /api/v1/projects/recent
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }

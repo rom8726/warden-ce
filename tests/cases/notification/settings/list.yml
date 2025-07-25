@@ -1,0 +1,161 @@
+- name: success get notification settings list
+  fixtures:
+    - empty_db
+    - project_with_notification_settings
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_notification_settings
+      request:
+        method: GET
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "notification_settings": [
+              {
+                "id": 1,
+                "project_id": 1,
+                "type": "email",
+                "config": "{\"email_to\": \"admin@warden.io\"}",
+                "enabled": true,
+                "created_at": "<<PRESENCE>>",
+                "updated_at": "<<PRESENCE>>"
+              },
+              {
+                "id": 2,
+                "project_id": 1,
+                "type": "slack",
+                "config": "{\"webhook_url\": \"https://hooks.slack.com/services/xxx\"}",
+                "enabled": false,
+                "created_at": "<<PRESENCE>>",
+                "updated_at": "<<PRESENCE>>"
+              }
+            ]
+          }
+
+- name: get notification settings without auth
+  fixtures:
+    - empty_db
+    - project_with_notification_settings
+
+  steps:
+    - name: get_notification_settings_unauthorized
+      request:
+        method: GET
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: get notification settings for non-existent project
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_notification_settings_nonexistent_project
+      request:
+        method: GET
+        path: /api/v1/projects/999/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+
+- name: get notification settings with empty list
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_notification_settings_empty
+      request:
+        method: GET
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "notification_settings": []
+          }
+
+- name: get notification settings with invalid project_id
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_notification_settings_invalid_project_id
+      request:
+        method: GET
+        path: /api/v1/projects/invalid/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400 

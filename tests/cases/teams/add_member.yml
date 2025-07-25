@@ -1,0 +1,429 @@
+- name: success add member to team
+  fixtures:
+    - empty_db
+    - single_team_with_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_member
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":2, "role":"member"}
+      response:
+        status: 201
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 2
+        - query: SELECT user_id, role FROM team_members WHERE team_id = 1 AND user_id = 2
+          result:
+            - user_id: 2
+              role: "member"
+
+- name: add member without auth
+  fixtures:
+    - empty_db
+    - single_team_with_users
+
+  steps:
+    - name: add_member_unauthorized
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+        body: {"user_id":2, "role":"member"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 1
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 2
+          result: []
+
+- name: add member to non-existent team
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_member_nonexistent_team
+      request:
+        method: POST
+        path: /api/v1/teams/999/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":2, "role":"member"}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+
+- name: add non-existent user to team
+  fixtures:
+    - empty_db
+    - single_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_nonexistent_user
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":999, "role":"member"}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 1
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 999
+          result: []
+
+- name: add member with invalid team_id
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_member_invalid_team_id
+      request:
+        method: POST
+        path: /api/v1/teams/invalid/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":2, "role":"member"}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 0
+
+- name: add member with invalid user_id
+  fixtures:
+    - empty_db
+    - single_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_member_invalid_user_id
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":"invalid", "role":"member"}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 1
+
+- name: add member with invalid role
+  fixtures:
+    - empty_db
+    - single_team_with_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_member_invalid_role
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":2, "role":"invalid_role"}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 1
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 2
+          result: []
+
+- name: add member with missing user_id
+  fixtures:
+    - empty_db
+    - single_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_member_missing_user_id
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"role":"member"}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 1
+
+- name: add member with missing role
+  fixtures:
+    - empty_db
+    - single_team_with_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_member_missing_role
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":2}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 1
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 2
+          result: []
+
+- name: add member with malformed JSON
+  fixtures:
+    - empty_db
+    - single_team_with_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_member_malformed_json
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: '{"user_id":2, "role":"member"'
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 1
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 2
+          result: []
+
+- name: add member as non-owner
+  fixtures:
+    - empty_db
+    - team_with_multiple_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user2", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_member_non_owner
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":4, "role":"member"}
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "forbidden"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 3
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 4
+          result: []
+
+- name: add member with different roles
+  fixtures:
+    - empty_db
+    - single_team_with_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_member_owner_role
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":2, "role":"owner"}
+      response:
+        status: 201
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 2
+        - query: SELECT user_id, role FROM team_members WHERE team_id = 1 AND user_id = 2
+          result:
+            - user_id: 2
+              role: "owner"
+    - name: add_member_admin_role
+      request:
+        method: POST
+        path: /api/v1/teams/1/members
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"user_id":3, "role":"admin"}
+      response:
+        status: 201
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 3
+        - query: SELECT user_id, role FROM team_members WHERE team_id = 1 AND user_id = 3
+          result:
+            - user_id: 3
+              role: "admin"

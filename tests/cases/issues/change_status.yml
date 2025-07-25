@@ -1,0 +1,255 @@
+- name: success change issue status
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: change_status_to_resolved
+      request:
+        method: PUT
+        path: /api/v1/projects/1/issues/1/change-status
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"status": "resolved"}
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT status::text AS status FROM issues WHERE id = 1
+          result:
+            - status: resolved
+    - name: change_status_to_unresolved
+      request:
+        method: PUT
+        path: /api/v1/projects/1/issues/1/change-status
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"status": "unresolved"}
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT status::text AS status FROM issues WHERE id = 1
+          result:
+            - status: unresolved
+
+- name: change status without auth
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: change_status_unauthorized
+      request:
+        method: PUT
+        path: /api/v1/projects/1/issues/1/change-status
+        headers:
+          Content-Type: application/json
+        body: {"status": "resolved"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: change status for non-existent issue
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: change_status_nonexistent_issue
+      request:
+        method: PUT
+        path: /api/v1/projects/1/issues/999/change-status
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"status": "resolved"}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+
+- name: change status for non-existent project
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: change_status_nonexistent_project
+      request:
+        method: PUT
+        path: /api/v1/projects/999/issues/1/change-status
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"status": "resolved"}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+
+- name: change status with invalid status
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: change_status_invalid_status
+      request:
+        method: PUT
+        path: /api/v1/projects/1/issues/1/change-status
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"status": "not_a_status"}
+      response:
+        status: 400
+        json: |
+          {
+            "error_message": "operation ChangeIssueStatus: decode request: validate: invalid: status (invalid value: not_a_status)"
+          }
+
+- name: change status with missing status field
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: change_status_missing_status
+      request:
+        method: PUT
+        path: /api/v1/projects/1/issues/1/change-status
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {}
+      response:
+        status: 400
+        json: |
+          {
+            "error_message": "operation ChangeIssueStatus: decode request: decode application/json: invalid: status (field required)"
+          }
+
+- name: change status with invalid project_id
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: change_status_invalid_project_id
+      request:
+        method: PUT
+        path: /api/v1/projects/invalid/issues/1/change-status
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"status": "resolved"}
+      response:
+        status: 400
+
+- name: change status with invalid issue_id
+  fixtures:
+    - empty_db
+    - project_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: change_status_invalid_issue_id
+      request:
+        method: PUT
+        path: /api/v1/projects/1/issues/invalid/change-status
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"status": "resolved"}
+      response:
+        status: 400

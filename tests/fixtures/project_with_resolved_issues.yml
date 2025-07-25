@@ -1,0 +1,67 @@
+public.teams:
+  - id: 1
+    name: developers
+    created_at: $eval(SELECT NOW())
+public.users:
+  - id: 1
+    username: admin
+    email: admin@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: true
+    is_active: true
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+    last_login: $eval(SELECT NOW())
+    is_tmp_password: false
+    two_fa_enabled: false
+public.team_members:
+  - team_id: 1
+    user_id: 1
+    role: owner
+public.projects:
+  - id: 1
+    name: Project1
+    description: Some project
+    public_key: 418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+    created_at: $eval(SELECT NOW())
+    team_id: 1
+public.issues:
+  - id: 1
+    project_id: 1
+    fingerprint: 54d8a9e1ba944f508464b4c0f6dd3320
+    source: event
+    status: resolved
+    title: "Error: Cannot read property of undefined"
+    level: error
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '7 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '1 hour')
+    total_events: 15
+    created_at: $eval(SELECT NOW() - INTERVAL '7 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '1 hour')
+  - id: 2
+    project_id: 1
+    fingerprint: 64d8a9e1ba944f508464b4c0f6dd3321
+    source: event
+    status: resolved
+    title: "ReferenceError: variable is not defined"
+    level: error
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '5 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '2 hours')
+    total_events: 8
+    created_at: $eval(SELECT NOW() - INTERVAL '5 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '2 hours')
+  - id: 3
+    project_id: 1
+    fingerprint: 74d8a9e1ba944f508464b4c0f6dd3322
+    source: event
+    status: resolved
+    title: "Warning: Deprecated function used"
+    level: warning
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '3 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '30 minutes')
+    total_events: 3
+    created_at: $eval(SELECT NOW() - INTERVAL '3 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '30 minutes')

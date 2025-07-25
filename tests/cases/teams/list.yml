@@ -1,0 +1,149 @@
+- name: success get teams list
+  fixtures:
+    - empty_db
+    - multiple_teams
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_teams_list
+      request:
+        method: GET
+        path: /api/v1/teams
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          [
+            {
+              "id": 1,
+              "name": "developers",
+              "created_at": "<<PRESENCE>>",
+              "members": [
+                {
+                  "user_id": 1,
+                  "role": "owner"
+                },
+                {
+                  "user_id": 2,
+                  "role": "member"
+                }
+              ]
+            },
+            {
+              "id": 2,
+              "name": "qa",
+              "created_at": "<<PRESENCE>>",
+              "members": [
+                {
+                  "user_id": 3,
+                  "role": "admin"
+                }
+              ]
+            }
+          ]
+
+- name: get teams list without auth
+  fixtures:
+    - empty_db
+    - multiple_teams
+
+  steps:
+    - name: get_teams_list_unauthorized
+      request:
+        method: GET
+        path: /api/v1/teams
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: get teams list with empty teams
+  fixtures:
+    - empty_db
+    - admin_user
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_teams_list_empty
+      request:
+        method: GET
+        path: /api/v1/teams
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          []
+
+- name: get teams list as regular user
+  fixtures:
+    - empty_db
+    - multiple_teams
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_teams_list_regular_user
+      request:
+        method: GET
+        path: /api/v1/teams
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          [
+            {
+              "id": 1,
+              "name": "developers",
+              "created_at": "<<PRESENCE>>",
+              "members": [
+                {
+                  "user_id": 1,
+                  "role": "owner"
+                },
+                {
+                  "user_id": 2,
+                  "role": "member"
+                }
+              ]
+            }
+          ]

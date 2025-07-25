@@ -1,0 +1,43 @@
+public.users:
+  - id: 1
+    username: admin
+    email: admin@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: true
+    is_active: true
+    is_tmp_password: false
+    two_fa_enabled: false
+    created_at: '2023-01-01T00:00:00Z'
+    last_login: '2023-01-02T00:00:00Z'
+
+public.projects:
+  - id: 1
+    name: Test Project
+    description: Some project
+    created_at: '2023-01-01T00:00:00Z'
+    public_key: public_key1
+
+public.notification_settings:
+  - id: 1
+    project_id: 1
+    type: email
+    config: '{"to":"admin@warden.io"}'
+    enabled: true
+    created_at: '2023-01-01T00:00:00Z'
+    updated_at: '2023-01-01T00:00:00Z'
+
+public.notification_rules:
+  - id: 1
+    notification_setting_id: 1
+    event_level: error
+    fingerprint: null
+    is_new_error: true
+    is_regression: false
+    created_at: '2023-01-01T00:00:00Z'
+  - id: 2
+    notification_setting_id: 1
+    event_level: warning
+    fingerprint: '54d8a9e1ba944f508464b4c0f6dd3320'
+    is_new_error: null
+    is_regression: true
+    created_at: '2023-01-01T00:00:00Z' 

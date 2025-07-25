@@ -1,0 +1,142 @@
+public.teams:
+  - id: 1
+    name: team1
+    created_at: $eval(SELECT NOW())
+  - id: 2
+    name: team2
+    created_at: $eval(SELECT NOW())
+
+public.users:
+  - id: 1
+    username: admin
+    email: admin@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: true
+    is_active: true
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+    last_login: $eval(SELECT NOW())
+    is_tmp_password: false
+    two_fa_enabled: false
+  - id: 2
+    username: team1_user
+    email: team1_user@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: false
+    is_active: true
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+    last_login: $eval(SELECT NOW())
+    is_tmp_password: false
+    two_fa_enabled: false
+  - id: 3
+    username: team2_user
+    email: team2_user@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: false
+    is_active: true
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+    last_login: $eval(SELECT NOW())
+    is_tmp_password: false
+    two_fa_enabled: false
+public.team_members:
+  - team_id: 1
+    user_id: 1
+    role: owner
+  - team_id: 1
+    user_id: 2
+    role: member
+  - team_id: 2
+    user_id: 1
+    role: owner
+  - team_id: 2
+    user_id: 3
+    role: member
+
+public.projects:
+  - id: 1
+    name: team1_project
+    description: Some project
+    public_key: 418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+    created_at: $eval(SELECT NOW())
+    team_id: 1
+  - id: 2
+    name: team2_project
+    description: Some project
+    public_key: 518aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc2
+    created_at: $eval(SELECT NOW())
+    team_id: 2
+  - id: 3
+    name: public_project
+    description: Some project
+    public_key: 618aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc3
+    created_at: $eval(SELECT NOW())
+    team_id: null
+
+public.issues:
+  - id: 1
+    project_id: 1
+    fingerprint: 54d8a9e1ba944f508464b4c0f6dd3320
+    source: event
+    status: unresolved
+    title: "Team1 Project Issue 1"
+    level: error
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '7 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '10 minutes')
+    total_events: 15
+    created_at: $eval(SELECT NOW() - INTERVAL '7 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '10 minutes')
+  - id: 2
+    project_id: 1
+    fingerprint: 64d8a9e1ba944f508464b4c0f6dd3321
+    source: event
+    status: unresolved
+    title: "Team1 Project Issue 2"
+    level: warning
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '5 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '30 minutes')
+    total_events: 8
+    created_at: $eval(SELECT NOW() - INTERVAL '5 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '30 minutes')
+  - id: 3
+    project_id: 2
+    fingerprint: 74d8a9e1ba944f508464b4c0f6dd3322
+    source: event
+    status: unresolved
+    title: "Team2 Project Issue 1"
+    level: error
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '3 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '5 minutes')
+    total_events: 12
+    created_at: $eval(SELECT NOW() - INTERVAL '3 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '5 minutes')
+  - id: 4
+    project_id: 2
+    fingerprint: 84d8a9e1ba944f508464b4c0f6dd3323
+    source: event
+    status: unresolved
+    title: "Team2 Project Issue 2"
+    level: fatal
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '2 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '20 minutes')
+    total_events: 5
+    created_at: $eval(SELECT NOW() - INTERVAL '2 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '20 minutes')
+  - id: 5
+    project_id: 3
+    fingerprint: 94d8a9e1ba944f508464b4c0f6dd3324
+    source: event
+    status: unresolved
+    title: "Public Project Issue 1"
+    level: error
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '4 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '15 minutes')
+    total_events: 10
+    created_at: $eval(SELECT NOW() - INTERVAL '4 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '15 minutes')

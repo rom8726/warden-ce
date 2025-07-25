@@ -1,0 +1,156 @@
+- name: success setup 2FA
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: setup_2fa
+      request:
+        method: POST
+        path: /api/v1/users/me/2fa/setup
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "qr_url": "<<PRESENCE>>",
+            "qr_image": "<<PRESENCE>>",
+            "secret": "<<PRESENCE>>"
+          }
+      dbChecks:
+        - query: SELECT two_fa_enabled, two_fa_secret, two_fa_confirmed_at FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: false
+              two_fa_secret: "<<PRESENCE>>"
+              two_fa_confirmed_at: null
+
+- name: setup 2FA without auth
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: setup_2fa_unauthorized
+      request:
+        method: POST
+        path: /api/v1/users/me/2fa/setup
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+      dbChecks:
+        - query: SELECT two_fa_enabled, two_fa_secret, two_fa_confirmed_at FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: false
+              two_fa_secret: null
+              two_fa_confirmed_at: null
+
+- name: setup 2FA with invalid token
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: setup_2fa_invalid_token
+      request:
+        method: POST
+        path: /api/v1/users/me/2fa/setup
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer invalid_token'
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+      dbChecks:
+        - query: SELECT two_fa_enabled, two_fa_secret, two_fa_confirmed_at FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: false
+              two_fa_secret: null
+              two_fa_confirmed_at: null
+
+- name: setup 2FA when already enabled
+  fixtures:
+    - empty_db
+    - admin_user_with_2fa
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 403
+        headers:
+          Content-Type: application/json
+        json: |
+          {
+            "error": {
+              "code": "2fa_required",
+              "session_id": "<<PRESENCE>>",
+              "message": "2FA required"
+            }
+          }
+    - name: verify_2fa
+      request:
+        method: POST
+        path: /api/v1/auth/2fa/verify
+        headers:
+          Content-Type: application/json
+        body: {"code":"123456", "session_id":"{{auth.response.error.session_id}}"}
+      response:
+        status: 200
+        json: |
+          {
+            "access_token": "<<PRESENCE>>",
+            "refresh_token": "<<PRESENCE>>",
+            "expires_in": "<<PRESENCE>>"
+          }
+    - name: setup_2fa_already_enabled
+      request:
+        method: POST
+        path: /api/v1/users/me/2fa/setup
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{verify_2fa.response.access_token}}'
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+        json: |
+          {
+            "secret": "<<PRESENCE>>",
+            "qr_url": "<<PRESENCE>>",
+            "qr_image": "<<PRESENCE>>"
+          }
+      dbChecks:
+        - query: SELECT two_fa_enabled, two_fa_secret FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: false
+              two_fa_secret: "<<PRESENCE>>"

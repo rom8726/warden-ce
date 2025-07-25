@@ -1,0 +1,335 @@
+- name: owner promotes member to admin
+  fixtures:
+    - empty_db
+    - team_with_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"owner", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: change_member_role
+      request:
+        method: PUT
+        path: /api/v1/teams/1/members/3/role
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"role":"admin"}
+      response:
+        status: 200
+      dbChecks:
+        - query: SELECT role FROM team_members WHERE team_id = 1 AND user_id = 3
+          result:
+            - role: "admin"
+
+- name: owner transfers ownership
+  fixtures:
+    - empty_db
+    - team_with_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"owner", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: change_member_role
+      request:
+        method: PUT
+        path: /api/v1/teams/1/members/2/role
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"role":"owner"}
+      response:
+        status: 200
+      dbChecks:
+        - query: SELECT role FROM team_members WHERE team_id = 1 AND user_id = 2
+          result:
+            - role: "owner"
+        - query: SELECT role FROM team_members WHERE team_id = 1 AND user_id = 1
+          result:
+            - role: "admin"
+
+- name: admin promotes member to admin
+  fixtures:
+    - empty_db
+    - team_with_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: change_member_role
+      request:
+        method: PUT
+        path: /api/v1/teams/1/members/3/role
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"role":"admin"}
+      response:
+        status: 200
+      dbChecks:
+        - query: SELECT role FROM team_members WHERE team_id = 1 AND user_id = 3
+          result:
+            - role: "admin"
+
+- name: member cannot change roles
+  fixtures:
+    - empty_db
+    - team_with_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"member", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: change_member_role
+      request:
+        method: PUT
+        path: /api/v1/teams/1/members/2/role
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"role":"member"}
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "Insufficient permissions to change role"
+            }
+          }
+      dbChecks:
+        - query: SELECT role FROM team_members WHERE team_id = 1 AND user_id = 2
+          result:
+            - role: "admin"
+
+- name: admin cannot change owner role
+  fixtures:
+    - empty_db
+    - team_with_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: change_member_role
+      request:
+        method: PUT
+        path: /api/v1/teams/1/members/1/role
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"role":"member"}
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "Insufficient permissions to change role"
+            }
+          }
+      dbChecks:
+        - query: SELECT role FROM team_members WHERE team_id = 1 AND user_id = 1
+          result:
+            - role: "owner"
+
+- name: admin cannot promote to owner
+  fixtures:
+    - empty_db
+    - team_with_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: change_member_role
+      request:
+        method: PUT
+        path: /api/v1/teams/1/members/3/role
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"role":"owner"}
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "Insufficient permissions to change role"
+            }
+          }
+      dbChecks:
+        - query: SELECT role FROM team_members WHERE team_id = 1 AND user_id = 3
+          result:
+            - role: "member"
+
+- name: cannot demote only owner
+  fixtures:
+    - empty_db
+    - team_with_single_owner
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"owner", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: change_member_role
+      request:
+        method: PUT
+        path: /api/v1/teams/1/members/1/role
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"role":"member"}
+      response:
+        status: 400
+        json: |
+          {
+            "error": {
+              "message": "Cannot demote the only owner of the team"
+            }
+          }
+      dbChecks:
+        - query: SELECT role FROM team_members WHERE team_id = 1 AND user_id = 1
+          result:
+            - role: "owner"
+
+- name: user not found in team
+  fixtures:
+    - empty_db
+    - team_with_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"owner", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: change_member_role
+      request:
+        method: PUT
+        path: /api/v1/teams/1/members/999/role
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"role":"admin"}
+      response:
+        status: 404
+
+- name: unauthorized access
+  fixtures:
+    - empty_db
+    - team_with_members
+
+  steps:
+    - name: change_member_role
+      request:
+        method: PUT
+        path: /api/v1/teams/1/members/2/role
+        headers:
+          Content-Type: application/json
+        body: {"role":"admin"}
+      response:
+        status: 401
+        headers:
+          Content-Type: application/json
+
+- name: invalid role
+  fixtures:
+    - empty_db
+    - team_with_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"owner", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: change_member_role
+      request:
+        method: PUT
+        path: /api/v1/teams/1/members/2/role
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"role":"invalid_role"}
+      response:
+        status: 400
+        headers:
+          Content-Type: application/json

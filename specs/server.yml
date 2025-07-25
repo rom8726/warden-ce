@@ -1,0 +1,4364 @@
+openapi: 3.0.0
+info:
+  title: Backend for Sentry-Compatible API Project
+  description: OpenAPI specification for a backend server for a compatible with the Sentry SDK project.
+  version: 1.1.0
+
+servers:
+  - url: https://warden.io
+    description: Main production backend
+paths:
+  # --- Authentication Endpoints ---
+  /api/v1/auth/login:
+    post:
+      summary: Authenticate user and get access token
+      operationId: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInvalidCredentials'
+        '403':
+          description: 2FA required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error2FARequired'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/auth/refresh:
+    post:
+      summary: Refresh access token
+      operationId: RefreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshTokenResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/auth/forgot-password:
+    post:
+      summary: Request a password reset
+      operationId: ForgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForgotPasswordRequest'
+      responses:
+        '204':
+          description: Password reset email sent successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/auth/reset-password:
+    post:
+      summary: Reset password using token
+      operationId: ResetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '204':
+          description: Password reset successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Invalid or expired token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/auth/2fa/verify:
+    post:
+      summary: Verify 2FA-code on login
+      operationId: Verify2FA
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TwoFAVerifyRequest'
+      responses:
+        '200':
+          description: Success, returns access/refresh tokens
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TwoFAVerifyResponse'
+        '400':
+          description: Invalid code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorTooManyRequests'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # --- System Endpoints ---
+  /api/v1/versions:
+    get:
+      summary: Get versions of all system components
+      description: Returns versions and build times of all Warden system components by collecting data from their tech servers
+      operationId: GetVersions
+      responses:
+        '200':
+          description: Versions of all system components
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionsResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # --- User Endpoints ---
+  /api/v1/users/me:
+    get:
+      summary: Get current user information
+      operationId: GetCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCurrentUserResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/users/me/change-password:
+    post:
+      summary: Change my password
+      operationId: userChangeMyPassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeUserPasswordRequest'
+      responses:
+        '204':
+          description: Password changed successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+                
+  /api/v1/users:
+    get:
+      summary: List all users (superuser only)
+      operationId: ListUsers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListUsersResponse'
+        '400':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new user (superuser only)
+      operationId: CreateUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateUserResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not a superuser
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/users/{user_id}:
+    delete:
+      summary: Delete a user (superuser only, cannot delete superusers)
+      operationId: DeleteUser
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: User deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not a superuser or trying to delete a superuser
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/users/{user_id}/superuser:
+    put:
+      summary: Set or unset superuser status (superuser only, cannot modify admin user)
+      operationId: SetSuperuserStatus
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetSuperuserStatusRequest'
+      responses:
+        '200':
+          description: Superuser status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not a superuser
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/users/{user_id}/active:
+    put:
+      summary: Set or unset user active status (superuser only)
+      operationId: SetUserActiveStatus
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetUserActiveStatusRequest'
+      responses:
+        '200':
+          description: User active status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not a superuser
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/users/team/{team_id}/list:
+    get:
+      summary: List all users for team admin
+      operationId: ListUsersForTeam
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListUsersResponse'
+        '400':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects:
+    get:
+      summary: Get projects list
+      operationId: ListProjects
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of projects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListProjectsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/recent:
+    get:
+      summary: Get recent projects list
+      operationId: RecentProjectsList
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of recent projects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListProjectsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/add:
+    post:
+      summary: Add new project
+      operationId: addProject
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddProjectRequest'
+      responses:
+        '201':
+          description: Project created
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}:
+    get:
+      summary: Get project details
+      operationId: GetProject
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Project details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update project name and description
+      operationId: UpdateProject
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectRequest'
+      responses:
+        '200':
+          description: Project updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Archive a project
+      operationId: ArchiveProject
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Project archived successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/stats:
+    get:
+      summary: Get project statistics
+      operationId: GetProjectStats
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: period
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [10m, 30m, 1h, 3h, 6h, 12h, 24h, 3d, 7d, 14d, 30d]
+            default: 7d
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Project statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectStatsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/team:
+    get:
+      summary: Get project team
+      operationId: GetProjectTeam
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Project team details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Project or team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # --- Issues Endpoints ---
+  /api/v1/issues:
+    get:
+      summary: Get all issues across all projects
+      operationId: ListIssues
+      parameters:
+        - name: level
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/IssueLevel'
+        - name: status
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/IssueStatus'
+        - name: project_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint
+        - name: per_page
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: uint
+            default: 20
+        - name: page
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: uint
+            default: 1
+        - name: sort_by
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/IssueSortColumn'
+            default: total_events
+        - name: sort_order
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/SortOrder'
+            default: desc
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of issues
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListIssuesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/issues/recent:
+    get:
+      summary: Get recent issues across all projects
+      operationId: GetRecentIssues
+      parameters:
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: uint
+            default: 5
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of recent issues
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListIssueSummariesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/issues/timeseries:
+    get:
+      summary: Get issues timeseries
+      operationId: GetIssuesTimeseries
+      parameters:
+        - name: project_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint
+        - $ref: '#/components/parameters/IntervalParam'
+        - $ref: '#/components/parameters/GranularityParam'
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Issues timeseries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeseriesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/issues/{issue_id}:
+    get:
+      summary: Get details of a specific issue
+      operationId: GetIssue
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: issue_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Issue details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssueResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Issue or project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/issues/{issue_id}/timeseries:
+    get:
+      summary: Get timeseries for a specific issue inside a project
+      operationId: GetProjectIssueTimeseries
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: issue_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - $ref: '#/components/parameters/IntervalParam'     # query ?interval=
+        - $ref: '#/components/parameters/GranularityParam'  # query ?granularity=
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Issue timeseries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeseriesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Issue or project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/issues/{issue_id}/events/timeseries:
+    get:
+      summary: Get timeseries of events for a specific issue inside a project
+      operationId: GetProjectIssueEventsTimeseries
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: issue_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - $ref: '#/components/parameters/IntervalParam'     # query ?interval=
+        - $ref: '#/components/parameters/GranularityParam'  # query ?granularity=
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Issue timeseries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeseriesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Issue or project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/issues/{issue_id}/change-status:
+    put:
+      summary: Change issue status
+      operationId: changeIssueStatus
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: issue_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/IssueStatus'
+              required:
+                - status
+      responses:
+        '204':
+          description: Issue status successfully updated
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Issue or project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/events/timeseries:
+    get:
+      summary: Get events timeseries
+      operationId: GetEventsTimeseries
+      parameters:
+        - name: project_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: uint
+        - $ref: '#/components/parameters/IntervalParam'
+        - $ref: '#/components/parameters/GranularityParam'
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Events timeseries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeseriesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # --- Notification Settings Endpoints ---
+  /api/v1/projects/{project_id}/notification-settings:
+    get:
+      summary: List all notification settings for a project
+      operationId: ListNotificationSettings
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of notification settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListNotificationSettingsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to access this project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new notification setting
+      operationId: CreateNotificationSetting
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotificationSettingRequest'
+      responses:
+        '201':
+          description: Notification setting created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSetting'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to modify this project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/notification-settings/{setting_id}:
+    get:
+      summary: Get a specific notification setting
+      operationId: GetNotificationSetting
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: setting_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notification setting details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSetting'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to access this notification setting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Notification setting not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update a notification setting
+      operationId: UpdateNotificationSetting
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: setting_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNotificationSettingRequest'
+      responses:
+        '200':
+          description: Notification setting updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationSetting'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to modify this notification setting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Notification setting not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a notification setting
+      operationId: DeleteNotificationSetting
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: setting_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Notification setting deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to delete this notification setting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Notification setting not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/notification-settings/{setting_id}/test:
+    post:
+      summary: Send test notification
+      operationId: sendTestNotification
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: setting_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      responses:
+        '204':
+          description: Notification successfully sent
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # --- Notification Rules Endpoints ---
+  /api/v1/projects/{project_id}/notification-settings/{setting_id}/rules:
+    get:
+      summary: List all notification rules for notification settings of project
+      operationId: ListNotificationRules
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: setting_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of notification rules
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListNotificationRulesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to access this project or notification setting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Project or notification setting not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new notification rule
+      operationId: CreateNotificationRule
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: setting_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNotificationRuleRequest'
+      responses:
+        '201':
+          description: Notification rule created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationRule'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to modify this notification setting
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Project or notification setting not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/notification-settings/{setting_id}/rules/{rule_id}:
+    get:
+      summary: Get a specific notification rule
+      operationId: GetNotificationRule
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: setting_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: rule_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notification rule details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationRule'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to access this notification rule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Project, notification setting, or notification rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update a notification rule
+      operationId: UpdateNotificationRule
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: setting_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: rule_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNotificationRuleRequest'
+      responses:
+        '200':
+          description: Notification rule updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationRule'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to modify this notification rule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Project, notification setting, or notification rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a notification rule
+      operationId: DeleteNotificationRule
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: setting_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: rule_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Notification rule deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to delete this notification rule
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Project, notification setting, or notification rule not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # --- Team Endpoints ---
+  /api/v1/teams:
+    get:
+      summary: List all teams
+      operationId: ListTeams
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListTeamsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create a new team
+      operationId: CreateTeam
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTeamRequest'
+      responses:
+        '201':
+          description: Team created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTeamResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/teams/{team_id}:
+    get:
+      summary: Get team details
+      operationId: GetTeam
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Team details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Team'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete a team
+      operationId: DeleteTeam
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Team deleted successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to delete this team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Team not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/teams/check-exists/{team_name}:
+    get:
+      summary: Check if a team exists by name
+      operationId: CheckTeamExists
+      parameters:
+        - name: team_name
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Team existence check result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamExistsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/teams/{team_id}/members:
+    post:
+      summary: Add a user to a team
+      operationId: AddTeamMember
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTeamMemberRequest'
+      responses:
+        '201':
+          description: User added to team successfully
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - Not authorized to modify this team
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Team or user not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/teams/{team_id}/members/{user_id}:
+    delete:
+      summary: Remove a user from a team (or self-leave)
+      description: |
+        Removes a user from a team. If user_id matches the current user's id, the operation is treated as self-leave (the user leaves the team).
+
+        Scenarios:
+        - Admin/owner removes another user
+        - User removes themselves (leave)
+
+        Restrictions:
+        - A user cannot leave the team if they are the only owner
+        - A superuser cannot leave the team if restricted by security policy
+      operationId: RemoveTeamMember
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: User removed from team successfully (or user left the team)
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: |
+            Forbidden - Insufficient permissions to remove a member or attempt to leave as the only owner
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Team, user, or membership not found (or user is not a member of the team)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/teams/{team_id}/members/{user_id}/role:
+    put:
+      summary: Change team member role
+      operationId: ChangeTeamMemberRole
+      parameters:
+        - name: team_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangeTeamMemberRoleRequest'
+      responses:
+        '200':
+          description: Role changed successfully
+        '400':
+          description: Bad request - invalid role or data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '403':
+          description: Forbidden - insufficient permissions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPermissionDenied'
+        '404':
+          description: Team or user not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/users/me/2fa/setup:
+    post:
+      summary: Begin setup 2FA (generate secret and QR-code)
+      operationId: Setup2FA
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Secret + QR-code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TwoFASetupResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/users/me/2fa/confirm:
+    post:
+      summary: Approve enable 2FA (code from app)
+      operationId: Confirm2FA
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TwoFAConfirmRequest'
+      responses:
+        '204':
+          description: 2FA enabled
+        '400':
+          description: Invalid code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorTooManyRequests'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/users/me/2fa/disable:
+    post:
+      summary: Disable 2FA (using email-confirmation)
+      operationId: Disable2FA
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TwoFADisableRequest'
+      responses:
+        '204':
+          description: 2FA disabled
+        '400':
+          description: Invalid code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/users/me/2fa/reset:
+    post:
+      summary: Reset/generate secret 2FA (using email-confirmation)
+      operationId: Reset2FA
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TwoFAResetRequest'
+      responses:
+        '200':
+          description: Secret + QR
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TwoFASetupResponse'
+        '400':
+          description: Invalid code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/users/me/2fa/send_code:
+    post:
+      summary: Send 2FA email code for disable/reset
+      operationId: send2FACode
+      tags:
+        - users
+      responses:
+        '204':
+          description: Code sent
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '429':
+          description: Too many requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/analytics/releases:
+    get:
+      summary: Get analytics summary for all releases in project
+      operationId: GetProjectReleasesAnalytics
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of releases with analytics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReleaseAnalyticsSummary'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Project not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/analytics/releases/{version}:
+    get:
+      summary: Get analytics details for a specific release
+      operationId: GetProjectReleaseAnalyticsDetails
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: version
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Release analytics details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseAnalyticsDetails'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Project or release not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/analytics/releases/compare:
+    post:
+      summary: Compare two releases analytics
+      operationId: CompareProjectReleasesAnalytics
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [base_version, target_version]
+              properties:
+                base_version:
+                  type: string
+                target_version:
+                  type: string
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Release comparison analytics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseComparison'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Project or release not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/analytics/traffic:
+    get:
+      summary: Get errors timeseries for a release
+      operationId: GetProjectReleaseErrorsTimeseries
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: release
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: level
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/IssueLevel'
+        - name: group_by
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [none, level]
+        - $ref: '#/components/parameters/IntervalParam'
+        - $ref: '#/components/parameters/GranularityParam'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Timeseries of errors for release
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeseriesResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Project or release not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/projects/{project_id}/analytics/segments:
+    get:
+      summary: Get user segments analytics for a release
+      operationId: GetProjectReleaseSegments
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: release
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: segment
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [platform, browser_name, os_name, device_arch, runtime_name]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Aggregation by segment for release
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReleaseSegmentsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Project or release not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorInternalServerError'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # User Notifications Endpoints
+  /api/v1/notifications:
+    get:
+      summary: Get user notifications
+      operationId: GetUserNotifications
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: uint
+            default: 50
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: uint
+            default: 0
+      responses:
+        '200':
+          description: List of user notifications
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserNotificationsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+
+  /api/v1/notifications/{notification_id}/read:
+    put:
+      summary: Mark notification as read
+      operationId: MarkNotificationAsRead
+      parameters:
+        - name: notification_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+      responses:
+        '204':
+          description: Notification marked as read
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        '404':
+          description: Notification not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorNotFound'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+
+  /api/v1/notifications/read-all:
+    put:
+      summary: Mark all notifications as read
+      operationId: MarkAllNotificationsAsRead
+      responses:
+        '204':
+          description: All notifications marked as read
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+
+  /api/v1/notifications/unread-count:
+    get:
+      summary: Get unread notifications count
+      operationId: GetUnreadNotificationsCount
+      responses:
+        '200':
+          description: Unread notifications count
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnreadCountResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorUnauthorized'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - bearerAuth: []
+
+# ---------------------------------------------------
+#                Components / Schemas
+# ---------------------------------------------------
+components:
+  parameters:
+    IntervalParam:
+      name: interval
+      in: query
+      required: true
+      schema:
+        type: string
+        pattern: '^\d+(m|h|d)$'
+        example: '7d'
+    GranularityParam:
+      name: granularity
+      in: query
+      required: true
+      schema:
+        type: string
+        pattern: '^\d+(m|h|d)$'
+        example: '1h'
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    # ---- Generic entities ----
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+      required: [error]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: uint
+          example: 1
+        username:
+          type: string
+          example: "john.doe"
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        is_superuser:
+          type: boolean
+          example: false
+        is_active:
+          type: boolean
+          example: true
+        is_tmp_password:
+          type: boolean
+          example: true
+        two_fa_enabled:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        last_login:
+          type: string
+          format: date-time
+          example: "2023-01-02T00:00:00Z"
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserTeam'
+      required: [id, username, email, is_superuser, is_active, is_tmp_password, two_fa_enabled, created_at]
+
+    AddProjectRequest:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          minLength: 2
+        description:
+          type: string
+          minLength: 10
+        team_id:
+          type: integer
+          format: uint
+          nullable: true
+          description: CPU architecture of the device
+
+    UpdateProjectRequest:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          minLength: 2
+        description:
+          type: string
+          minLength: 10
+
+    # ---- /auth/login ----
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "user@example.com"
+        password:
+          type: string
+          example: "password123"
+      required: [username, password]
+
+    LoginResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: "<JWT_ACCESS_TOKEN>"
+        refresh_token:
+          type: string
+          example: "<JWT_REFRESH_TOKEN>"
+        expires_in:
+          type: integer
+          example: 3600
+        is_tmp_password:
+          type: boolean
+          example: true
+      required: [access_token, refresh_token, expires_in, is_tmp_password]
+
+    ErrorInvalidCredentials:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          example:
+            error:
+              code: "invalid_credentials"
+              message: "Invalid username or password"
+
+    # ---- Notification Settings ----
+    NotificationSetting:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: uint
+          example: 1
+        project_id:
+          type: integer
+          format: uint
+          example: 123
+        type:
+          type: string
+          example: "email"
+          description: "Type of notification channel (email, mattermost, slack, etc.)"
+        config:
+          type: string
+          description: "Configuration for the notification channel (JSONB in database)"
+        enabled:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2023-01-02T00:00:00Z"
+      required: [id, project_id, type, config, enabled, created_at, updated_at]
+
+    ListNotificationSettingsResponse:
+      type: object
+      properties:
+        notification_settings:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationSetting'
+      required: [notification_settings]
+
+    CreateNotificationSettingRequest:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/NotificationChannelType'
+        config:
+          type: string
+          minLength: 2
+          description: "Configuration for the notification channel (JSONB in database)"
+        enabled:
+          type: boolean
+          example: true
+          default: true
+      required: [type, config]
+
+    UpdateNotificationSettingRequest:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "email"
+          description: "Type of notification channel (email, mattermost, slack, etc.)"
+        config:
+          type: string
+          description: "Configuration for the notification channel (JSONB in database)"
+        enabled:
+          type: boolean
+          example: true
+      required: []
+
+    # ---- Notification Rules ----
+    NotificationRule:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: uint
+          example: 1
+        notification_setting_id:
+          type: integer
+          format: uint
+          example: 123
+        event_level:
+          type: string
+          example: "error"
+          description: "Level of event to trigger notification (error, warning, info, etc.)"
+          nullable: true
+        fingerprint:
+          type: string
+          example: "54d8a9e1ba944f508464b4c0f6dd3320"
+          description: "Specific error fingerprint to trigger notification"
+          nullable: true
+        is_new_error:
+          type: boolean
+          example: true
+          description: "Trigger only for new errors"
+          nullable: true
+        is_regression:
+          type: boolean
+          example: false
+          description: "Trigger only for regressions (resolved -> unresolved)"
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+      required: [id, notification_setting_id, created_at]
+
+    ListNotificationRulesResponse:
+      type: object
+      properties:
+        notification_rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationRule'
+      required: [notification_rules]
+
+    CreateNotificationRuleRequest:
+      type: object
+      properties:
+        event_level:
+          type: string
+          example: "error"
+          description: "Level of event to trigger notification (error, warning, info, etc.)"
+          nullable: true
+        fingerprint:
+          type: string
+          example: "54d8a9e1ba944f508464b4c0f6dd3320"
+          description: "Specific error fingerprint to trigger notification"
+          nullable: true
+        is_new_error:
+          type: boolean
+          example: true
+          description: "Trigger only for new errors"
+          nullable: true
+        is_regression:
+          type: boolean
+          example: false
+          description: "Trigger only for regressions (resolved -> unresolved)"
+          nullable: true
+      required: []
+
+    UpdateNotificationRuleRequest:
+      type: object
+      properties:
+        event_level:
+          type: string
+          example: "error"
+          description: "Level of event to trigger notification (error, warning, info, etc.)"
+          nullable: true
+        fingerprint:
+          type: string
+          example: "54d8a9e1ba944f508464b4c0f6dd3320"
+          description: "Specific error fingerprint to trigger notification"
+          nullable: true
+        is_new_error:
+          type: boolean
+          example: true
+          description: "Trigger only for new errors"
+          nullable: true
+        is_regression:
+          type: boolean
+          example: false
+          description: "Trigger only for regressions (resolved -> unresolved)"
+          nullable: true
+      required: []
+
+    # ---- /auth/refresh ----
+    RefreshTokenRequest:
+      type: object
+      properties:
+        refresh_token:
+          type: string
+          example: "<JWT_REFRESH_TOKEN>"
+      required: [refresh_token]
+
+    RefreshTokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: "<JWT_ACCESS_TOKEN>"
+        refresh_token:
+          type: string
+          example: "<JWT_REFRESH_TOKEN>"
+        expires_in:
+          type: integer
+          example: 3600
+      required: [access_token, refresh_token, expires_in]
+
+    ErrorInvalidToken:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          example:
+            error:
+              code: "invalid_token"
+              message: "Invalid refresh token"
+
+    # ---- /auth/forgot-password ----
+    ForgotPasswordRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+      required: [email]
+
+    # ---- /auth/reset-password ----
+    ResetPasswordRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          example: "reset_token_123456"
+        new_password:
+          type: string
+          example: "newpassword123"
+          minLength: 8
+      required: [token, new_password]
+
+    # ---- /users/me ----
+    GetCurrentUserResponse:
+      $ref: '#/components/schemas/User'
+
+    ErrorInternalServerError:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          example:
+            error:
+              code: "internal"
+              message: "Internal server error"
+
+    ErrorBadRequest:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          example:
+            error:
+              code: "bad_request"
+              message: "Bad request"
+
+    ErrorUnauthorized:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          example:
+            error:
+              code: "unauthorized"
+              message: "Authentication required"
+
+    ErrorPermissionDenied:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          example:
+            error:
+              code: "permission_denied"
+              message: "Permission denied"
+
+    ErrorTooManyRequests:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          example:
+            error:
+              code: "too_many_requests"
+              message: "Too many requests"
+
+    # ---- /users ----
+    ListUsersResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/User'
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: uint
+          example: 1
+        name:
+          type: string
+          example: "My Project"
+        description:
+          type: string
+          example: Mailing system project for developers
+          nullable: false
+        team_id:
+          type: integer
+          format: uint
+          nullable: true
+          example: 1
+        team_name:
+          type: string
+          nullable: true
+          example: Backend Go Team
+        public_key:
+          type: string
+          nullable: false
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+      required: [id, name, public_key, description, created_at]
+
+    ListProjectsResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/Project'
+
+    ProjectResponse:
+      type: object
+      properties:
+        project:
+          $ref: '#/components/schemas/Project'
+      required: [project]
+
+    ProjectStatsResponse:
+      type: object
+      properties:
+        total_issues:
+          type: integer
+          format: uint
+          example: 125
+        issues_by_level:
+          type: object
+          properties:
+            fatal:
+              type: integer
+              format: uint
+              example: 1
+            exception:
+              type: integer
+              format: uint
+              example: 3
+            error:
+              type: integer
+              format: uint
+              example: 42
+            warning:
+              type: integer
+              format: uint
+              example: 68
+            info:
+              type: integer
+              format: uint
+              example: 15
+            debug:
+              type: integer
+              format: uint
+              example: 178
+          required: [fatal, exception, error, warning, info, debug]
+        most_frequent_issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueSummary'
+      required: [total_issues, issues_by_level, most_frequent_issues]
+
+    Issue:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: uint
+        project_id:
+          type: integer
+          format: uint
+          example: 1
+        source:
+          $ref: '#/components/schemas/IssueSource'
+        status:
+          $ref: '#/components/schemas/IssueStatus'
+        project_name:
+          type: string
+          example: MyProject
+        title:
+          type: string
+          example: "TypeError: Cannot read property of undefined"
+        message:
+          type: string
+          example: "TypeError: Cannot read property 'data' of undefined at processResponse (/app/src/utils/api.js:25:10)"
+        level:
+          $ref: '#/components/schemas/IssueLevel'
+        platform:
+          type: string
+          example: go
+        count:
+          type: integer
+          format: uint
+          example: 23
+        first_seen:
+          type: string
+          format: date-time
+          example: "2023-06-07T10:23:45Z"
+        last_seen:
+          type: string
+          format: date-time
+          example: "2023-06-08T12:34:56Z"
+        resolved_at:
+          type: string
+          format: date-time
+          example: "2023-06-08T12:34:56Z"
+        resolved_by:
+          type: string
+          example: "user123"
+      required:
+        - id
+        - project_id
+        - project_name
+        - source
+        - status
+        - title
+        - message
+        - level
+        - platform
+        - count
+        - first_seen
+        - last_seen
+
+    IssueSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: uint
+          example: 123
+        project_id:
+          type: integer
+          format: uint
+          example: 1
+        title:
+          type: string
+          example: "TypeError: Cannot read property of undefined"
+        level:
+          $ref: '#/components/schemas/IssueLevel'
+        count:
+          type: integer
+          format: uint
+          example: 23
+        last_seen:
+          type: string
+          format: date-time
+          example: "2023-06-08T12:34:56Z"
+      required: [id, project_id, title, level, count, last_seen]
+
+    ListIssuesResponse:
+      type: object
+      properties:
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/Issue'
+        total:
+          type: integer
+          format: uint
+          example: 125
+        page:
+          type: integer
+          format: uint
+          example: 1
+          minimum: 1
+        per_page:
+          type: integer
+          format: uint
+          example: 20
+          minimum: 1
+      required: [issues, total, page, per_page]
+
+    ListIssueSummariesResponse:
+      type: object
+      properties:
+        issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueSummary'
+      required: [issues]
+
+    IssueResponse:
+      type: object
+      required: [ source, issue, events ]
+      properties:
+        source:
+          $ref: '#/components/schemas/IssueSource'
+        issue:
+          $ref: '#/components/schemas/Issue'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueEvent'
+
+    IssueSource:
+      type: string
+      description: Identifies where the issue comes from.
+      enum: [event, exception]
+
+    IssueStatus:
+      type: string
+      description: Resolved or not.
+      enum: [resolved, unresolved, ignored]
+
+    IssueLevel:
+      type: string
+      description: Issue level
+      enum: [fatal, exception, error, warning, info, debug]
+
+    IssueSortColumn:
+      type: string
+      description: Column to sort issues by
+      enum: [total_events, first_seen, last_seen]
+
+    SortOrder:
+      type: string
+      description: Sort order (ascending or descending)
+      enum: [asc, desc]
+
+    IssueEvent:
+      type: object
+      description: Full representation of domain.Event
+      required:
+        - event_id
+        - timestamp
+        - project_id
+        - level
+        - source
+        - platform
+        - message
+      properties:
+        event_id:
+          type: string
+          description: Unique identifier of the event (domain.Event.ID)
+          example: "a1b2c3d4e5f6"
+        timestamp:
+          type: string
+          format: date-time
+          description: Time when the event occurred
+        group_hash:
+          type: string
+          description: Hash used for grouping events
+        project_id:
+          type: integer
+          format: uint
+          description: Identifier of the project that owns the event
+        level:
+          $ref: '#/components/schemas/IssueLevel'
+        source:
+          $ref: '#/components/schemas/IssueSource'
+        platform:
+          type: string
+          description: Platform that sent the event
+        message:
+          type: string
+          description: Short textual description of the event
+        payload:
+          type: object
+          description: Raw JSON payload as received from the client
+          additionalProperties: true
+        tags:
+          type: object
+          description: Key-value tags attached to the event
+          additionalProperties:
+            type: string
+        server_name:
+          type: string
+          description: Hostname of the server where the event happened
+        environment:
+          type: string
+          description: Runtime environment (production, staging, etc.)
+        release:
+          type: string
+          description: Application release version
+
+        # --- Exception context ---
+        exception_type:
+          type: string
+          nullable: true
+          description: Exception class/type
+        exception_value:
+          type: string
+          nullable: true
+          description: Exception message
+        exception_stacktrace:
+          type: string
+          nullable: true
+          description: Exception stacktrace
+
+        # --- Request context ---
+        request_url:
+          type: string
+          nullable: true
+          description: Full request URL
+        request_method:
+          type: string
+          nullable: true
+          description: HTTP method
+        request_query:
+          type: string
+          nullable: true
+          description: Raw query string
+        request_headers:
+          type: object
+          nullable: true
+          description: HTTP headers
+          additionalProperties:
+            type: string
+        request_data:
+          type: string
+          nullable: true
+          description: Request body (as sent)
+
+        # ---- /users POST (Create User) ----
+        request_cookies:
+          type: string
+          nullable: true
+          description: Cookies string
+        request_ip:
+          type: string
+          nullable: true
+          description: Client IP address
+        user_agent:
+          type: string
+          nullable: true
+          description: User-Agent header
+
+        # --- User data ---
+        user_id:
+          type: string
+          nullable: true
+          description: User identifier
+        user_email:
+          type: string
+          nullable: true
+          description: User email address
+
+        # --- Runtime context ---
+        runtime_name:
+          type: string
+          nullable: true
+          description: Runtime name (e.g., node, python)
+        runtime_version:
+          type: string
+          nullable: true
+          description: Runtime version
+        os_name:
+          type: string
+          nullable: true
+          description: Operating system name
+        os_version:
+          type: string
+          nullable: true
+          description: Operating system version
+        browser_name:
+          type: string
+          nullable: true
+          description: Browser name
+        browser_version:
+          type: string
+          nullable: true
+          description: Browser version
+        device_arch:
+          type: string
+          nullable: true
+
+    TimeseriesResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/TimeseriesData'
+
+    TimeseriesData:
+      type: object
+      required: [period, name, occurrences]
+      properties:
+        period:
+          $ref: '#/components/schemas/Period'
+        name:
+          type: string
+        occurrences:
+          type: array
+          items:
+            type: integer
+            format: uint
+
+    ErrorNotFound:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          example:
+            error:
+              code: "not_found"
+              message: "Resource not found"
+    Period:
+      type: object
+      required: [interval, granularity]
+      properties:
+        interval:
+          type: string
+          pattern: '^\d+(m|h|d)$'
+          example: '7d'
+        granularity:
+          type: string
+          pattern: '^\d+(m|h|d)$'
+          example: '1h'
+
+    # ---- /users POST (Create User) ----
+    CreateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "john.doe"
+          minLength: 3
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+        password:
+          type: string
+          example: "password123"
+          minLength: 8
+        is_superuser:
+          type: boolean
+          example: false
+      required: [username, email, password]
+
+    CreateUserResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+      required: [user]
+
+    # ---- User Team schemas ----
+    UserTeam:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: uint
+          example: 1
+        name:
+          type: string
+          example: "Engineering Team"
+        role:
+          type: string
+          enum: [owner, admin, member]
+          example: "member"
+        can_leave:
+          type: boolean
+          description: "Whether user can leave this team"
+          example: true
+      required: [id, name, role]
+
+    UserWithTeamsInfo:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserTeam'
+      required: [user, teams]
+
+    # ---- Team schemas ----
+    Team:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: uint
+          example: 1
+        name:
+          type: string
+          example: "Engineering Team"
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-01-01T00:00:00Z"
+        members:
+          type: array
+          items:
+            $ref: '#/components/schemas/TeamMember'
+      required: [id, name, created_at, members]
+
+    TeamResponse:
+      type: object
+      properties:
+        team:
+          $ref: '#/components/schemas/Team'
+      required: [team]
+
+    TeamMember:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          format: uint
+          example: 1
+        role:
+          type: string
+          enum: [owner, admin, member]
+          example: "member"
+      required: [user_id, role]
+
+    CreateTeamRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          example: "Engineering Team"
+      required: [name]
+
+    CreateTeamResponse:
+      type: object
+      properties:
+        team:
+          $ref: '#/components/schemas/Team'
+      required: [team]
+
+    AddTeamMemberRequest:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          format: uint
+          example: 1
+        role:
+          type: string
+          enum: [owner, admin, member]
+          example: "member"
+      required: [user_id, role]
+
+    ChangeTeamMemberRoleRequest:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [owner, admin, member]
+          example: "admin"
+      required: [role]
+
+    ListTeamsResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/Team'
+
+    TeamExistsResponse:
+      type: object
+      properties:
+        exists:
+          type: boolean
+          example: true
+      required: [exists]
+
+    SetSuperuserStatusRequest:
+      type: object
+      properties:
+        is_superuser:
+          type: boolean
+          example: true
+      required: [is_superuser]
+
+    SetUserActiveStatusRequest:
+      type: object
+      properties:
+        is_active:
+          type: boolean
+          example: true
+      required: [is_active]
+
+    ChangeUserPasswordRequest:
+      type: object
+      required:
+        - old_password
+        - new_password
+      properties:
+        old_password:
+          type: string
+          example: "password123"
+        new_password:
+          type: string
+          example: "password1234"
+          minLength: 8
+
+    NotificationChannelType:
+      type: string
+      enum: [email, telegram, slack, mattermost, webhook, pachca]
+      description: "Type of notification channel (email, mattermost, slack, etc.)"
+
+    TwoFASetupResponse:
+      type: object
+      properties:
+        secret:
+          type: string
+          example: "JBSWY3DPEHPK3PXP"
+        qr_url:
+          type: string
+          example: "otpauth://totp/Warden:user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=Warden"
+        qr_image:
+          type: string
+          description: "Base64 PNG QR image"
+      required: [secret, qr_url, qr_image]
+
+    TwoFAConfirmRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "123456"
+      required: [code]
+
+    TwoFADisableRequest:
+      type: object
+      properties:
+        email_code:
+          type: string
+          example: "abcdef"
+      required: [email_code]
+
+    TwoFAResetRequest:
+      type: object
+      properties:
+        email_code:
+          type: string
+          example: "abcdef"
+      required: [email_code]
+
+    TwoFAVerifyRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          example: "123456"
+        session_id:
+          type: string
+          example: "session-uuid"
+      required: [code, session_id]
+
+    TwoFAVerifyResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: "<JWT_ACCESS_TOKEN>"
+        refresh_token:
+          type: string
+          example: "<JWT_REFRESH_TOKEN>"
+        expires_in:
+          type: integer
+          example: 3600
+      required: [access_token, refresh_token, expires_in]
+
+    Error2FARequired:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "2fa_required"
+            session_id:
+              type: string
+              example: ldfkgjjknfsjhsjdhfsjkhdfjk3445
+            message:
+              type: string
+              example: "2FA required"
+          required: [code, session_id, message]
+      required: [error]
+
+    ReleaseAnalyticsSummary:
+      type: object
+      properties:
+        version:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        known_issues_total:
+          type: integer
+          format: uint
+        new_issues_total:
+          type: integer
+          format: uint
+        regressions_total:
+          type: integer
+          format: uint
+        resolved_in_version_total:
+          type: integer
+          format: uint
+        users_affected:
+          type: integer
+          format: uint
+      required: [version, created_at, known_issues_total, new_issues_total, regressions_total, resolved_in_version_total, users_affected]
+
+    ReleaseAnalyticsDetails:
+      type: object
+      properties:
+        version:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        stats:
+          $ref: '#/components/schemas/ReleaseAnalyticsSummary'
+        top_issues:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueSummary'
+        severity_distribution:
+          type: object
+          additionalProperties:
+            type: integer
+            format: uint
+        fix_time:
+          type: object
+          properties:
+            avg:
+              type: number
+              format: float
+            median:
+              type: number
+              format: float
+            p95:
+              type: number
+              format: float
+        segments:
+          type: object
+          properties:
+            platform:
+              type: object
+              additionalProperties:
+                type: integer
+                format: uint
+            browser_name:
+              type: object
+              additionalProperties:
+                type: integer
+                format: uint
+            os_name:
+              type: object
+              additionalProperties:
+                type: integer
+                format: uint
+            device_arch:
+              type: object
+              additionalProperties:
+                type: integer
+                format: uint
+            runtime_name:
+              type: object
+              additionalProperties:
+                type: integer
+                format: uint
+      required: [version, created_at, stats, top_issues, severity_distribution, fix_time, segments]
+
+    ReleaseComparison:
+      type: object
+      properties:
+        base:
+          $ref: '#/components/schemas/ReleaseAnalyticsSummary'
+        target:
+          $ref: '#/components/schemas/ReleaseAnalyticsSummary'
+        delta:
+          type: object
+          properties:
+            known_issues_total:
+              type: integer
+              format: uint
+            new_issues_total:
+              type: integer
+              format: uint
+            regressions_total:
+              type: integer
+              format: uint
+            resolved_in_version_total:
+              type: integer
+              format: uint
+            users_affected:
+              type: integer
+              format: uint
+      required: [base, target, delta]
+
+    ReleaseSegmentsResponse:
+      type: object
+      properties:
+        segment:
+          type: string
+        values:
+          type: object
+          additionalProperties:
+            type: integer
+            format: uint
+      required: [segment, values]
+
+    UserNotification:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: uint
+        user_id:
+          type: integer
+          format: uint
+        type:
+          type: string
+          enum: [team_added, team_removed, role_changed, issue_regression]
+        content:
+          type: object
+          additionalProperties: true
+        is_read:
+          type: boolean
+        email_sent:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+      required: [id, user_id, type, content, is_read, email_sent, created_at, updated_at]
+
+    UserNotificationsResponse:
+      type: object
+      properties:
+        notifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserNotification'
+        total:
+          type: integer
+      required: [notifications, total]
+
+    UnreadCountResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+          format: uint
+      required: [count]
+
+    ComponentVersion:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the component
+          example: "backend"
+        version:
+          type: string
+          description: Version of the component
+          example: "1.0.0"
+        build_time:
+          type: string
+          description: Build time of the component
+          example: "2024-01-15T10:30:00Z"
+        status:
+          type: string
+          enum: [available, unavailable]
+          description: Status of the component's tech server
+          example: "available"
+      required: [name, version, build_time, status]
+
+    VersionsResponse:
+      type: object
+      properties:
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComponentVersion'
+          description: List of all system components with their versions
+        collected_at:
+          type: string
+          format: date-time
+          description: Timestamp when the versions were collected
+          example: "2024-01-15T10:30:00Z"
+      required: [components, collected_at]

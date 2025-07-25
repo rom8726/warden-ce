@@ -1,0 +1,131 @@
+- name: success get releases analytics list
+  fixtures:
+    - empty_db
+    - project_with_releases
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_releases_analytics
+      request:
+        method: GET
+        path: /api/v1/projects/1/analytics/releases
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          [
+            {
+              "version": "1.2.0",
+              "created_at": "<<PRESENCE>>",
+              "known_issues_total": 0,
+              "new_issues_total": 0,
+              "regressions_total": 0,
+              "resolved_in_version_total": 0,
+              "users_affected": 0
+            },
+            {
+              "version": "1.1.0",
+              "created_at": "<<PRESENCE>>",
+              "known_issues_total": 2,
+              "new_issues_total": 2,
+              "regressions_total": 0,
+              "resolved_in_version_total": 2,
+              "users_affected": 8
+            },
+            {
+              "version": "1.0.0",
+              "created_at": "<<PRESENCE>>",
+              "known_issues_total": 2,
+              "new_issues_total": 2,
+              "regressions_total": 0,
+              "resolved_in_version_total": 0,
+              "users_affected": 15
+            }
+          ]
+
+- name: get releases analytics without auth
+  fixtures:
+    - empty_db
+    - project_with_releases
+
+  steps:
+    - name: get_releases_analytics_unauthorized
+      request:
+        method: GET
+        path: /api/v1/projects/1/analytics/releases
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: get releases analytics for non-existent project
+  fixtures:
+    - empty_db
+    - project_with_releases
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_releases_analytics_not_found
+      request:
+        method: GET
+        path: /api/v1/projects/999/analytics/releases
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 404
+
+- name: get releases analytics for user without access !!!TODO!!!
+  fixtures:
+    - empty_db
+    - project_with_releases
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"dev2", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_releases_analytics_no_access
+      request:
+        method: GET
+        path: /api/v1/projects/1/analytics/releases
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200

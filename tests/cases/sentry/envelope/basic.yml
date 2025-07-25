@@ -1,0 +1,102 @@
+- name: successful envelope processing info event
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: send_envelope
+      request:
+        method: POST
+        path: /api/1/envelope/
+        headers:
+          Content-Type: application/x-sentry-envelope
+          Content-Length: 1261
+          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"41de046f213943a989788152401b99a3","sent_at":"2025-06-19T08:00:15.765779+03:00","dsn":"http://418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1@127.0.0.1:8080/1","sdk":{"name":"sentry.go","version":"0.33.0"},"trace":{"environment":"development","public_key":"418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1","trace_id":"840544dd94facb7f89db1a60ea354a7a"}}
+          {"type":"event","length":830}
+          {"contexts":{"device":{"arch":"arm64","num_cpu":11},"os":{"name":"darwin"},"runtime":{"go_maxprocs":11,"go_numcgocalls":0,"go_numroutines":3,"name":"go","version":"go1.24.2"},"trace":{"span_id":"d5e367497c4fcde5","trace_id":"840544dd94facb7f89db1a60ea354a7a"}},"environment":"development","event_id":"41de046f213943a989788152401b99a3","level":"info","message":"This is test message","platform":"go","sdk":{"name":"sentry.go","version":"0.33.0","integrations":["ContextifyFrames","Environment","GlobalTags","IgnoreErrors","IgnoreTransactions","Modules"],"packages":[{"name":"sentry-go","version":"0.33.0"}]},"server_name":"192.168.0.6","user":{},"modules":{"github.com/getsentry/sentry-go":"v0.33.0","golang.org/x/sys":"v0.18.0","golang.org/x/text":"v0.14.0","sentry-sender":"(devel)"},"timestamp":"2025-06-19T08:00:15.7657+03:00"}
+      response:
+        status: 200
+        body: OK
+      dbChecks:
+        - query: SELECT id, project_id, fingerprint::TEXT, source::TEXT, status::TEXT, title, level::TEXT, platform, (now() - first_seen < interval '5 seconds') as first_seen_ok, (now() - last_seen < interval '5 seconds') as last_seen_ok, total_events FROM issues
+          result: |
+            [{"id": 1, "project_id": 1, "fingerprint": "8391792f2e81804a86e21924d2966f46530678c6", "source": "event", "status": "unresolved", "title": "This is test message", "level": "info", "platform": "go", "first_seen_ok": true, "last_seen_ok": true, "total_events": 1}]
+
+- name: empty envelope error
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: send_empty_envelope
+      request:
+        method: POST
+        path: /api/1/envelope/
+        headers:
+          Content-Type: application/x-sentry-envelope
+          Content-Length: 1261
+          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: ""
+      response:
+        status: 400
+        json: |
+          {
+            "error": {
+              "message": "empty envelope"
+            }
+          }
+
+- name: invalid envelope header
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: send_invalid_header
+      request:
+        method: POST
+        path: /api/1/envelope/
+        headers:
+          Content-Type: application/x-sentry-envelope
+          Content-Length: 1261
+          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          invalid json header
+          {"type":"event","sample_rates":[]}
+          {"event_id": "e1e2e3e4e5"}
+      response:
+        status: 400
+        json: |
+          {
+            "error": {
+              "message": "invalid envelope header"
+            }
+          }
+
+- name: project not found
+  fixtures:
+    - empty_db
+
+  steps:
+    - name: send_to_nonexistent_project
+      request:
+        method: POST
+        path: /api/999/envelope/
+        headers:
+          Content-Type: application/x-sentry-envelope
+          Content-Length: 1261
+          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"e1e2e3e4e5","dsn":"https://123456@warden.example.com/42","sent_at":"2025-06-07T12:00:00Z"}
+          {"type":"event","length":24}
+          {"event_id": "e1e2e3e4e5"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }

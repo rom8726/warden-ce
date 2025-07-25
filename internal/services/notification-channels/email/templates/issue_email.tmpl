@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px;
+            background-color: #1c1e23;
+            color: #f5f5fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 24px auto;
+            padding: 24px;
+            background: linear-gradient(to bottom, #2d3038, #23262e);
+            border: 1px solid #3a3d4a;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.3);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #3a3d4a;
+        }
+        .title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #f5f5fa;
+        }
+        .section {
+            margin-top: 24px;
+        }
+        .row {
+            margin-bottom: 12px;
+        }
+        .label {
+            font-weight: 600;
+            color: #a0a8b5;
+            width: 120px;
+            display: inline-block;
+        }
+        a {
+            color: #8252ff;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .level-badge {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #fff;
+            font-weight: 500;
+        }
+        .level-error { background: linear-gradient(45deg, #ff5a5a, #e53935); }
+        .level-warning { background: linear-gradient(45deg, #ffaa5a, #f9a825); }
+        .level-info { background: linear-gradient(45deg, #5ac8ff, #2196f3); }
+        .level-exception { background: linear-gradient(45deg, #b388ff, #8e24aa); }
+        .level-fatal { background: linear-gradient(45deg, #ff5a5a, #c0392b); }
+        .level-debug { background: linear-gradient(45deg, #9eabb5, #607d8b); }
+        .footer {
+            margin-top: 32px;
+            font-size: 13px;
+            color: #8892a0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">Warden Issue Notification</div>
+    </div>
+    <div class="section">
+        <div class="row"><span class="label">Project:</span> {{ .ProjectName }}</div>
+        <div class="row"><span class="label">Issue:</span> #{{ .ID }} — {{ .Title }}</div>
+        <div class="row"><span class="label">Level:</span> <span class="level-badge level-{{ .Level }}">{{ .Level }}</span></div>
+        <div class="row"><span class="label">Status:</span> {{ .Status }}</div>
+        <div class="row"><span class="label">Is Regress:</span> {{if .IsRegress}}Yes{{else}}No{{end}}</div>
+        <div class="row"><span class="label">First seen:</span> {{ .FirstSeen }}</div>
+        <div class="row"><span class="label">Last seen:</span> {{ .LastSeen }}</div>
+        <div class="row"><span class="label">Platform:</span> {{ .Platform }}</div>
+        <div class="row"><span class="label">Occurrences:</span> {{ .TotalEvents }}</div>
+        <div class="row"><span class="label">URL:</span> <a href="{{ .BaseURL }}/projects/{{ .ProjectID }}/issues/{{ .ID }}">View Issue</a></div>
+    </div>
+    <div class="footer">
+        Stay on top of your project's health,<br />— The Warden Team
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,219 @@
+- name: success get notification rules list
+  fixtures:
+    - empty_db
+    - project_with_notification_rules
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_notification_rules
+      request:
+        method: GET
+        path: /api/v1/projects/1/notification-settings/1/rules
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "notification_rules": [
+              {
+                "id": 1,
+                "notification_setting_id": 1,
+                "event_level": "error",
+                "is_new_error": true,
+                "is_regression": false,
+                "created_at": "<<PRESENCE>>"
+              },
+              {
+                "id": 2,
+                "notification_setting_id": 1,
+                "event_level": "warning",
+                "fingerprint": "54d8a9e1ba944f508464b4c0f6dd3320",
+                "is_regression": true,
+                "created_at": "<<PRESENCE>>"
+              }
+            ]
+          }
+
+- name: get notification rules without auth
+  fixtures:
+    - empty_db
+    - project_with_notification_rules
+
+  steps:
+    - name: get_notification_rules_unauthorized
+      request:
+        method: GET
+        path: /api/v1/projects/1/notification-settings/1/rules
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: get notification rules for non-existent project
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_notification_rules_nonexistent_project
+      request:
+        method: GET
+        path: /api/v1/projects/999/notification-settings/1/rules
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+
+- name: get notification rules for non-existent setting
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_notification_rules_nonexistent_setting
+      request:
+        method: GET
+        path: /api/v1/projects/1/notification-settings/999/rules
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "get notification setting: entity not found"
+            }
+          }
+
+- name: get notification rules with empty list
+  fixtures:
+    - empty_db
+    - project_with_notification_settings
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_notification_rules_empty
+      request:
+        method: GET
+        path: /api/v1/projects/1/notification-settings/1/rules
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "notification_rules": []
+          }
+
+- name: get notification rules with invalid project_id
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_notification_rules_invalid_project_id
+      request:
+        method: GET
+        path: /api/v1/projects/invalid/notification-settings/1/rules
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400
+
+- name: get notification rules with invalid setting_id
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_notification_rules_invalid_setting_id
+      request:
+        method: GET
+        path: /api/v1/projects/1/notification-settings/invalid/rules
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400 

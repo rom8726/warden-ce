@@ -1,0 +1,133 @@
+- name: success refresh token
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: login
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: refresh_token
+      request:
+        method: POST
+        path: /api/v1/auth/refresh
+        headers:
+          Content-Type: application/json
+        body: {"refresh_token":"{{login.response.refresh_token}}"}
+      response:
+        status: 200
+        json: |
+          {
+            "access_token": "<<PRESENCE>>",
+            "refresh_token": "<<PRESENCE>>",
+            "expires_in": "<<PRESENCE>>"
+          }
+
+- name: refresh with invalid token
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: refresh_invalid_token
+      request:
+        method: POST
+        path: /api/v1/auth/refresh
+        headers:
+          Content-Type: application/json
+        body: {"refresh_token":"invalid_token"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "invalid token"
+            }
+          }
+
+- name: refresh with empty token
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: refresh_empty_token
+      request:
+        method: POST
+        path: /api/v1/auth/refresh
+        headers:
+          Content-Type: application/json
+        body: {"refresh_token":""}
+      response:
+        status: 401
+
+- name: refresh with missing token
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: refresh_missing_token
+      request:
+        method: POST
+        path: /api/v1/auth/refresh
+        headers:
+          Content-Type: application/json
+        body: {}
+      response:
+        status: 400
+
+- name: refresh with malformed JSON
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: refresh_malformed_json
+      request:
+        method: POST
+        path: /api/v1/auth/refresh
+        headers:
+          Content-Type: application/json
+        body: '{"refresh_token":"some_token"'
+      response:
+        status: 400
+
+- name: refresh with access token instead of refresh token
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: login
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+    - name: refresh_with_access_token
+      request:
+        method: POST
+        path: /api/v1/auth/refresh
+        headers:
+          Content-Type: application/json
+        body: {"refresh_token":"{{login.response.access_token}}"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "invalid token"
+            }
+          }

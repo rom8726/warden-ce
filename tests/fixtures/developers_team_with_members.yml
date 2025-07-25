@@ -1,0 +1,48 @@
+public.teams:
+  - id: 1
+    name: developers
+    created_at: $eval(SELECT NOW())
+public.users:
+  - id: 1
+    username: admin
+    email: admin@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: true
+    is_active: true
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+    last_login: $eval(SELECT NOW())
+    is_tmp_password: false
+    two_fa_enabled: false
+  - id: 2
+    username: dev2
+    email: dev2@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: false
+    is_active: true
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+    last_login: $eval(SELECT NOW())
+    is_tmp_password: false
+    two_fa_enabled: false
+  - id: 3
+    username: dev3
+    email: dev3@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: false
+    is_active: true
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+    last_login: $eval(SELECT NOW())
+    is_tmp_password: false
+    two_fa_enabled: false
+public.team_members:
+  - team_id: 1
+    user_id: 1
+    role: owner
+  - team_id: 1
+    user_id: 2
+    role: admin
+  - team_id: 1
+    user_id: 3
+    role: member

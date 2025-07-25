@@ -1,0 +1,79 @@
+{{define "UserNotificationEmail"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px;
+            background-color: #1c1e23;
+            color: #f5f5fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 24px auto;
+            padding: 24px;
+            background: linear-gradient(to bottom, #2d3038, #23262e);
+            border: 1px solid #3a3d4a;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.3);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #3a3d4a;
+        }
+        .title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #f5f5fa;
+        }
+        .content {
+            margin-top: 24px;
+            line-height: 1.6;
+        }
+        .footer {
+            margin-top: 32px;
+            font-size: 13px;
+            color: #8892a0;
+            text-align: center;
+            border-top: 1px solid #3a3d4a;
+            padding-top: 16px;
+        }
+        b {
+            color: #f5f5fa;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">Warden: User Notification</div>
+    </div>
+    <div class="content">
+        {{if .TeamAdded}}
+            <p>You have been added to team <b>{{.TeamAdded.TeamName}}</b> with role <b>{{.TeamAdded.Role}}</b> by user <b>{{.TeamAdded.AddedByUsername}}</b>.</p>
+        {{end}}
+        {{if .TeamRemoved}}
+            <p>You have been removed from team <b>{{.TeamRemoved.TeamName}}</b> by user <b>{{.TeamRemoved.RemovedByUsername}}</b>.</p>
+        {{end}}
+        {{if .RoleChanged}}
+            <p>Your role in team <b>{{.RoleChanged.TeamName}}</b> has been changed from <b>{{.RoleChanged.OldRole}}</b> to <b>{{.RoleChanged.NewRole}}</b> by user <b>{{.RoleChanged.ChangedByUsername}}</b>.</p>
+        {{end}}
+        {{if .IssueRegression}}
+            <p>Issue <b>{{.IssueRegression.IssueTitle}}</b> (ID: {{.IssueRegression.IssueID}}) in project <b>{{.IssueRegression.ProjectName}}</b> has become active again.<br>
+            Resolved: {{.IssueRegression.ResolvedAt}}<br>
+            Regression: {{.IssueRegression.ReactivatedAt}}</p>
+        {{end}}
+    </div>
+    <div class="footer">
+        This is an automated notification. Please do not reply to this email.
+    </div>
+</div>
+</body>
+</html>
+{{end}}

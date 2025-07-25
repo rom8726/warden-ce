@@ -1,0 +1,32 @@
+public.users:
+  - id: 1
+    username: admin
+    email: admin@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: true
+    is_active: true
+    is_tmp_password: false
+    two_fa_enabled: false
+    created_at: '2023-01-01T00:00:00Z'
+    last_login: '2023-01-02T00:00:00Z'
+
+public.projects:
+  - id: 1
+    name: Test Project
+    description: Some project
+    created_at: '2023-01-01T00:00:00Z'
+    public_key: public_key1
+
+public.notification_settings:
+  - id: 1
+    project_id: 1
+    type: email
+    config: '{"email_to":"admin@warden.io"}'
+    enabled: true
+    created_at: '2023-01-01T00:00:00Z'
+  - id: 2
+    project_id: 1
+    type: slack
+    config: '{"webhook_url":"https://hooks.slack.com/services/xxx"}'
+    enabled: false
+    created_at: '2023-01-01T00:00:00Z'

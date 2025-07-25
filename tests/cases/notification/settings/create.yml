@@ -1,0 +1,280 @@
+- name: success create notification setting
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: create_notification_setting
+      request:
+        method: POST
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"email", "config":"{\"to\":\"admin@warden.io\"}", "enabled":true}
+      response:
+        status: 201
+        json: |
+          {
+            "id": 1,
+            "project_id": 1,
+            "type": "email",
+            "config": "{\"to\": \"admin@warden.io\"}",
+            "enabled": true,
+            "created_at": "<<PRESENCE>>",
+            "updated_at": "<<PRESENCE>>"
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM notification_settings
+          result:
+            - cnt: 1
+        - query: SELECT type, config::text AS config_txt, enabled FROM notification_settings WHERE id = 1
+          result:
+            - type: "email"
+              config_txt: "{\"to\": \"admin@warden.io\"}"
+              enabled: true
+
+- name: create notification setting without auth
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: create_notification_setting_unauthorized
+      request:
+        method: POST
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+        body: {"type":"email", "config":"{\"to\":\"admin@warden.io\"}", "enabled":true}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: create notification setting for non-existent project
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: create_notification_setting_nonexistent_project
+      request:
+        method: POST
+        path: /api/v1/projects/999/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"email", "config":"{\"to\":\"admin@warden.io\"}", "enabled":true}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+
+- name: create notification setting with missing type
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: create_notification_setting_missing_type
+      request:
+        method: POST
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"config":"{\"to\":\"admin@warden.io\"}", "enabled":true}
+      response:
+        status: 400
+
+- name: create notification setting with missing config
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: create_notification_setting_missing_config
+      request:
+        method: POST
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"email", "enabled":true}
+      response:
+        status: 400
+
+- name: create notification setting with empty type
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: create_notification_setting_empty_type
+      request:
+        method: POST
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"", "config":"{\"to\":\"admin@warden.io\"}", "enabled":true}
+      response:
+        status: 400
+
+- name: create notification setting with empty config
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: create_notification_setting_empty_config
+      request:
+        method: POST
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"email", "config":"", "enabled":true}
+      response:
+        status: 400
+
+- name: create notification setting with malformed JSON
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: create_notification_setting_malformed_json
+      request:
+        method: POST
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: '{"type":"email", "config":"{\"to\":\"admin@warden.io\"", "enabled":true}'
+      response:
+        status: 400
+
+- name: create notification setting with different types
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: create_email_setting
+      request:
+        method: POST
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"email", "config":"{\"to\":\"admin@warden.io\"}", "enabled":true}
+      response:
+        status: 201
+    - name: create_slack_setting
+      request:
+        method: POST
+        path: /api/v1/projects/1/notification-settings
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"slack", "config":"{\"webhook_url\":\"https://hooks.slack.com/services/xxx\"}", "enabled":false}
+      response:
+        status: 201 

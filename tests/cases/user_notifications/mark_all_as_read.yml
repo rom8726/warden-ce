@@ -1,0 +1,82 @@
+- name: success mark all notifications as read
+  fixtures:
+    - empty_db
+    - user_notifications
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: mark_all_notifications_as_read
+      request:
+        method: PUT
+        path: /api/v1/notifications/read-all
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM user_notifications WHERE user_id = 2 AND is_read = true
+          result:
+            - cnt: 2
+
+- name: mark all notifications as read without auth
+  fixtures:
+    - empty_db
+    - user_notifications
+
+  steps:
+    - name: mark_all_notifications_as_read_unauthorized
+      request:
+        method: PUT
+        path: /api/v1/notifications/read-all
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: mark all notifications as read for user with no notifications
+  fixtures:
+    - empty_db
+    - single_team_with_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: mark_all_notifications_as_read_empty
+      request:
+        method: PUT
+        path: /api/v1/notifications/read-all
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM user_notifications WHERE user_id = 2
+          result:
+            - cnt: 0

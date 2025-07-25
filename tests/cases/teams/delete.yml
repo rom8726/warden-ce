@@ -1,0 +1,176 @@
+- name: success delete team
+  fixtures:
+    - empty_db
+    - single_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: delete_team
+      request:
+        method: DELETE
+        path: /api/v1/teams/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM teams
+          result:
+            - cnt: 0
+        - query: SELECT id FROM teams WHERE id = 1
+          result: []
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 0
+
+- name: delete team without auth
+  fixtures:
+    - empty_db
+    - single_team
+
+  steps:
+    - name: delete_team_unauthorized
+      request:
+        method: DELETE
+        path: /api/v1/teams/1
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: delete non-existent team
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: delete_nonexistent_team
+      request:
+        method: DELETE
+        path: /api/v1/teams/999
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+
+- name: delete team with invalid team_id
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: delete_team_invalid_id
+      request:
+        method: DELETE
+        path: /api/v1/teams/invalid
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400
+
+- name: delete team with negative team_id
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: delete_team_negative_id
+      request:
+        method: DELETE
+        path: /api/v1/teams/-1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400
+
+- name: delete team as non-owner
+  fixtures:
+    - empty_db
+    - team_with_multiple_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user2", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: delete_team_non_owner
+      request:
+        method: DELETE
+        path: /api/v1/teams/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "forbidden"
+            }
+          } 

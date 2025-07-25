@@ -1,0 +1,195 @@
+- name: success compare releases analytics
+  fixtures:
+    - empty_db
+    - project_with_releases
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: compare_releases_analytics
+      request:
+        method: POST
+        path: /api/v1/projects/1/analytics/releases/compare
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"base_version": "1.0.0", "target_version": "1.1.0"}
+      response:
+        status: 200
+        json: |
+          {
+            "base": {
+              "version": "1.0.0",
+              "created_at": "<<PRESENCE>>",
+              "known_issues_total": 2,
+              "new_issues_total": 2,
+              "regressions_total": 0,
+              "resolved_in_version_total": 0,
+              "users_affected": 15
+            },
+            "target": {
+              "version": "1.1.0",
+              "created_at": "<<PRESENCE>>",
+              "known_issues_total": 2,
+              "new_issues_total": 2,
+              "regressions_total": 0,
+              "resolved_in_version_total": 2,
+              "users_affected": 8
+            },
+            "delta": {
+              "known_issues_total": 0,
+              "new_issues_total": 0,
+              "regressions_total": 0,
+              "resolved_in_version_total": 2,
+              "users_affected": 7
+            }
+          }
+
+- name: compare releases analytics without auth
+  fixtures:
+    - empty_db
+    - project_with_releases
+
+  steps:
+    - name: compare_releases_analytics_unauthorized
+      request:
+        method: POST
+        path: /api/v1/projects/1/analytics/releases/compare
+        headers:
+          Content-Type: application/json
+        body: {"base_version": "1.0.0", "target_version": "1.1.0"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: compare releases analytics for non-existent project
+  fixtures:
+    - empty_db
+    - project_with_releases
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: compare_releases_analytics_project_not_found
+      request:
+        method: POST
+        path: /api/v1/projects/999/analytics/releases/compare
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"base_version": "1.0.0","target_version": "1.1.0"}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "<<PRESENCE>>"
+            }
+          }
+
+- name: compare releases analytics with non-existent base release
+  fixtures:
+    - empty_db
+    - project_with_releases
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: compare_releases_analytics_base_not_found
+      request:
+        method: POST
+        path: /api/v1/projects/1/analytics/releases/compare
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"base_version": "2.0.0","target_version": "1.1.0"}
+      response:
+        status: 404
+
+- name: compare releases analytics with non-existent target release
+  fixtures:
+    - empty_db
+    - project_with_releases
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: compare_releases_analytics_target_not_found
+      request:
+        method: POST
+        path: /api/v1/projects/1/analytics/releases/compare
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"base_version": "1.0.0","target_version": "2.0.0"}
+      response:
+        status: 404
+
+- name: compare releases analytics with invalid request body
+  fixtures:
+    - empty_db
+    - project_with_releases
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: compare_releases_analytics_invalid_request
+      request:
+        method: POST
+        path: /api/v1/projects/1/analytics/releases/compare
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"base_version": "1.0.0"}
+      response:
+        status: 400

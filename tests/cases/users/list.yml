@@ -1,0 +1,157 @@
+- name: success get users list as superuser
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_users_list
+      request:
+        method: GET
+        path: /api/v1/users
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          [
+            {
+              "id": 1,
+              "username": "admin",
+              "email": "admin@warden.io",
+              "is_superuser": true,
+              "is_active": true,
+              "is_tmp_password": false,
+              "two_fa_enabled": false,
+              "created_at": "<<PRESENCE>>",
+              "last_login": "<<PRESENCE>>"
+            },
+            {
+              "id": 2,
+              "username": "user1",
+              "email": "user1@warden.io",
+              "is_superuser": false,
+              "is_active": true,
+              "is_tmp_password": false,
+              "two_fa_enabled": false,
+              "created_at": "<<PRESENCE>>",
+              "last_login": "<<PRESENCE>>"
+            },
+            {
+              "id": 3,
+              "username": "user2",
+              "email": "user2@warden.io",
+              "is_superuser": false,
+              "is_active": false,
+              "is_tmp_password": false,
+              "two_fa_enabled": false,
+              "created_at": "<<PRESENCE>>",
+              "last_login": "<<PRESENCE>>"
+            }
+          ]
+
+- name: get users list without auth
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: get_users_list_unauthorized
+      request:
+        method: GET
+        path: /api/v1/users
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: get users list as regular user
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_users_list_forbidden
+      request:
+        method: GET
+        path: /api/v1/users
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "Only superusers can list users"
+            }
+          }
+
+- name: get users list with single user
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_users_list_single
+      request:
+        method: GET
+        path: /api/v1/users
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          [
+            {
+              "id": 1,
+              "username": "admin",
+              "email": "admin@warden.io",
+              "is_superuser": true,
+              "is_active": true,
+              "is_tmp_password": false,
+              "two_fa_enabled": false,
+              "created_at": "<<PRESENCE>>",
+              "last_login": "<<PRESENCE>>"
+            }
+          ]

@@ -1,0 +1,278 @@
+public.teams:
+  - id: 1
+    name: team_alpha
+    created_at: $eval(SELECT NOW())
+  - id: 2
+    name: team_beta
+    created_at: $eval(SELECT NOW())
+public.users:
+  - id: 1
+    username: admin
+    email: admin@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: true
+    is_active: true
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+    last_login: $eval(SELECT NOW())
+    is_tmp_password: false
+    two_fa_enabled: false
+  - id: 2
+    username: user
+    email: user@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: false
+    is_active: true
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+    last_login: $eval(SELECT NOW())
+    is_tmp_password: false
+    two_fa_enabled: false
+public.team_members:
+  - team_id: 1
+    user_id: 1
+    role: owner
+  - team_id: 1
+    user_id: 2
+    role: member
+  - team_id: 2
+    user_id: 1
+    role: owner
+public.projects:
+  - id: 1
+    name: AlphaProject
+    description: Some project
+    public_key: "1111111111111111111111111111111111111111111111111111111111111111"
+    created_at: $eval(SELECT NOW())
+    team_id: 1
+  - id: 2
+    name: BetaProject
+    description: Some project
+    public_key: "2222222222222222222222222222222222222222222222222222222222222222"
+    created_at: $eval(SELECT NOW())
+    team_id: 2
+  - id: 3
+    name: GammaProject
+    description: Some project
+    public_key: "3333333333333333333333333333333333333333333333333333333333333333"
+    created_at: $eval(SELECT NOW())
+    team_id: 1
+  - id: 4
+    name: DeltaProject
+    description: Some project
+    public_key: "4444444444444444444444444444444444444444444444444444444444444444"
+    created_at: $eval(SELECT NOW())
+    team_id: 2
+  - id: 5
+    name: EpsilonProject
+    description: Some project
+    public_key: "5555555555555555555555555555555555555555555555555555555555555555"
+    created_at: $eval(SELECT NOW())
+    team_id: null
+  - id: 6
+    name: ZetaProject
+    description: Some project
+    public_key: "6666666666666666666666666666666666666666666666666666666666666666"
+    created_at: $eval(SELECT NOW())
+    team_id: null
+  - id: 7
+    name: OmegaProject
+    description: Some project
+    public_key: "7777777777777777777777777777777777777777777777777777777777777777"
+    created_at: $eval(SELECT NOW())
+    team_id: null
+public.issues:
+  # Активность в AlphaProject (fatal)
+  - id: 1
+    project_id: 1
+    fingerprint: 1111aaaa
+    source: event
+    status: unresolved
+    title: "Fatal crash in Alpha"
+    level: fatal
+    platform: go
+    first_seen: $eval(SELECT NOW() - INTERVAL '1 day')
+    last_seen: $eval(SELECT NOW() - INTERVAL '10 minutes')
+    total_events: 5
+    created_at: $eval(SELECT NOW() - INTERVAL '1 day')
+    updated_at: $eval(SELECT NOW() - INTERVAL '10 minutes')
+  # Активность в BetaProject (error)
+  - id: 2
+    project_id: 2
+    fingerprint: 2222bbbb
+    source: event
+    status: unresolved
+    title: "Error in Beta"
+    level: error
+    platform: python
+    first_seen: $eval(SELECT NOW() - INTERVAL '2 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '1 hour')
+    total_events: 10
+    created_at: $eval(SELECT NOW() - INTERVAL '2 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '1 hour')
+  # Активность в GammaProject (warning)
+  - id: 3
+    project_id: 3
+    fingerprint: 3333cccc
+    source: event
+    status: unresolved
+    title: "Warning in Gamma"
+    level: warning
+    platform: js
+    first_seen: $eval(SELECT NOW() - INTERVAL '3 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '2 hours')
+    total_events: 2
+    created_at: $eval(SELECT NOW() - INTERVAL '3 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '2 hours')
+  # Нет активности в DeltaProject (last_seen > 3 часа)
+  - id: 4
+    project_id: 4
+    fingerprint: 4444dddd
+    source: event
+    status: unresolved
+    title: "Old error in Delta"
+    level: error
+    platform: js
+    first_seen: $eval(SELECT NOW() - INTERVAL '10 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '4 hours')
+    total_events: 1
+    created_at: $eval(SELECT NOW() - INTERVAL '10 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '4 hours')
+  # Нет активности в EpsilonProject (last_seen > 3 часа)
+  - id: 5
+    project_id: 5
+    fingerprint: 5555eeee
+    source: event
+    status: unresolved
+    title: "Old info in Epsilon"
+    level: info
+    platform: js
+    first_seen: $eval(SELECT NOW() - INTERVAL '20 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '10 hours')
+    total_events: 1
+    created_at: $eval(SELECT NOW() - INTERVAL '20 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '10 hours')
+  # Активность в ZetaProject (exception, без команды)
+  - id: 6
+    project_id: 6
+    fingerprint: 6666ffff
+    source: event
+    status: unresolved
+    title: "Exception in Zeta"
+    level: exception
+    platform: js
+    first_seen: $eval(SELECT NOW() - INTERVAL '1 day')
+    last_seen: $eval(SELECT NOW() - INTERVAL '30 minutes')
+    total_events: 7
+    created_at: $eval(SELECT NOW() - INTERVAL '1 day')
+    updated_at: $eval(SELECT NOW() - INTERVAL '30 minutes')
+  # Нет активности в OmegaProject (last_seen > 3 часа, без команды)
+  - id: 7
+    project_id: 7
+    fingerprint: 7777gggg
+    source: event
+    status: unresolved
+    title: "Old debug in Omega"
+    level: debug
+    platform: js
+    first_seen: $eval(SELECT NOW() - INTERVAL '30 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '5 hours')
+    total_events: 1
+    created_at: $eval(SELECT NOW() - INTERVAL '30 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '5 hours')
+  # Дополнительные issues для AlphaProject
+  - id: 8
+    project_id: 1
+    fingerprint: 1111bbbb
+    source: event
+    status: unresolved
+    title: "Error in Alpha"
+    level: error
+    platform: go
+    first_seen: $eval(SELECT NOW() - INTERVAL '2 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '1 hour')
+    total_events: 12
+    created_at: $eval(SELECT NOW() - INTERVAL '2 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '1 hour')
+  - id: 9
+    project_id: 1
+    fingerprint: 1111cccc
+    source: event
+    status: unresolved
+    title: "Warning in Alpha"
+    level: warning
+    platform: go
+    first_seen: $eval(SELECT NOW() - INTERVAL '3 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '2 hours')
+    total_events: 3
+    created_at: $eval(SELECT NOW() - INTERVAL '3 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '2 hours')
+  # Дополнительные issues для BetaProject
+  - id: 10
+    project_id: 2
+    fingerprint: 2222cccc
+    source: event
+    status: unresolved
+    title: "Exception in Beta"
+    level: exception
+    platform: python
+    first_seen: $eval(SELECT NOW() - INTERVAL '1 day')
+    last_seen: $eval(SELECT NOW() - INTERVAL '20 minutes')
+    total_events: 2
+    created_at: $eval(SELECT NOW() - INTERVAL '1 day')
+    updated_at: $eval(SELECT NOW() - INTERVAL '20 minutes')
+  # Дополнительные issues для GammaProject
+  - id: 11
+    project_id: 3
+    fingerprint: 3333dddd
+    source: event
+    status: unresolved
+    title: "Info in Gamma"
+    level: info
+    platform: js
+    first_seen: $eval(SELECT NOW() - INTERVAL '2 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '1 hour')
+    total_events: 1
+    created_at: $eval(SELECT NOW() - INTERVAL '2 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '1 hour')
+  # Дополнительные issues для ZetaProject (без команды)
+  - id: 12
+    project_id: 6
+    fingerprint: 6666aaaa
+    source: event
+    status: unresolved
+    title: "Error in Zeta"
+    level: error
+    platform: js
+    first_seen: $eval(SELECT NOW() - INTERVAL '2 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '1 hour')
+    total_events: 4
+    created_at: $eval(SELECT NOW() - INTERVAL '2 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '1 hour')
+  - id: 13
+    project_id: 6
+    fingerprint: 6666bbbb
+    source: event
+    status: unresolved
+    title: "Warning in Zeta"
+    level: warning
+    platform: js
+    first_seen: $eval(SELECT NOW() - INTERVAL '3 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '2 hours')
+    total_events: 2
+    created_at: $eval(SELECT NOW() - INTERVAL '3 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '2 hours')
+  # Дополнительные issues для OmegaProject (без команды, неактивные)
+  - id: 14
+    project_id: 7
+    fingerprint: 7777hhhh
+    source: event
+    status: unresolved
+    title: "Info in Omega"
+    level: info
+    platform: js
+    first_seen: $eval(SELECT NOW() - INTERVAL '10 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '6 hours')
+    total_events: 1
+    created_at: $eval(SELECT NOW() - INTERVAL '10 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '6 hours') 

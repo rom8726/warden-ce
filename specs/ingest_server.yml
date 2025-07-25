@@ -1,0 +1,120 @@
+openapi: 3.0.0
+info:
+  title: Sentry-Compatible API Server
+  description: OpenAPI specification for a server compatible with the Sentry SDK.
+  version: 1.1.0
+
+servers:
+  - url: https://your-sentry-server.com
+    description: Main production server
+paths:
+  /api/{project_id}/store/:
+    post:
+      summary: Accept an event in JSON format from the Sentry SDK.
+      operationId: StoreEvent
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "123456"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreEventResponse'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - sentry_auth: []
+
+  /api/{project_id}/envelope/:
+    post:
+      summary: Accept an envelope containing multiple parts of data.
+      operationId: ReceiveEnvelope
+      parameters:
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "123456"
+      requestBody:
+        required: true
+        content:
+          application/x-sentry-envelope:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Success response
+          content:
+            text/plain:
+              example: "OK"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorBadRequest'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+        - sentry_auth: []
+# ---------------------------------------------------
+#                Components / Schemas
+# ---------------------------------------------------
+components:
+  securitySchemes:
+    sentry_auth:
+      type: apiKey
+      in: header
+      name: X-Sentry-Auth
+  schemas:
+    # ---- /api/{project_id}/store/ ----
+    StoreEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "54d8a9e1ba944f508464b4c0f6dd3320"
+      required: [id]
+
+    # ---- Generic entities ----
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            message:
+              type: string
+      required: [error]
+
+    ErrorBadRequest:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          example:
+            error:
+              code: "bad_request"
+              message: "Bad request"

@@ -1,0 +1,193 @@
+- name: success get team details
+  fixtures:
+    - empty_db
+    - single_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_team_details
+      request:
+        method: GET
+        path: /api/v1/teams/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "id": 1,
+            "name": "developers",
+            "created_at": "<<PRESENCE>>",
+            "members": [
+              {
+                "user_id": 1,
+                "role": "owner"
+              }
+            ]
+          }
+
+- name: get team without auth
+  fixtures:
+    - empty_db
+    - single_team
+
+  steps:
+    - name: get_team_unauthorized
+      request:
+        method: GET
+        path: /api/v1/teams/1
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: get non-existent team
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_nonexistent_team
+      request:
+        method: GET
+        path: /api/v1/teams/999
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "Team not found"
+            }
+          }
+
+- name: get team with invalid team_id
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_team_invalid_id
+      request:
+        method: GET
+        path: /api/v1/teams/invalid
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400
+
+- name: get team with negative team_id
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_team_negative_id
+      request:
+        method: GET
+        path: /api/v1/teams/-1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400
+
+- name: get team with multiple members
+  fixtures:
+    - empty_db
+    - team_with_multiple_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_team_multiple_members
+      request:
+        method: GET
+        path: /api/v1/teams/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "id": 1,
+            "name": "developers",
+            "created_at": "<<PRESENCE>>",
+            "members": [
+              {
+                "user_id": 1,
+                "role": "owner"
+              },
+              {
+                "user_id": 2,
+                "role": "admin"
+              },
+              {
+                "user_id": 3,
+                "role": "member"
+              }
+            ]
+          } 

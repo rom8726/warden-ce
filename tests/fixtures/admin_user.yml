@@ -1,0 +1,12 @@
+public.users:
+  - id: 1
+    username: admin
+    email: admin@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: true
+    is_active: true
+    created_at: $eval(SELECT NOW() - INTERVAL '7 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '7 days')
+    last_login: $eval(SELECT NOW() - INTERVAL '7 days')
+    is_tmp_password: false
+    two_fa_enabled: false

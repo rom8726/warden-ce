@@ -1,0 +1,390 @@
+- name: success removes a member from a team
+  fixtures:
+    - empty_db
+    - team_with_multiple_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: remove_member
+      request:
+        method: DELETE
+        path: /api/v1/teams/1/members/2
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 2
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 2
+          result: []
+
+- name: remove member without auth
+  fixtures:
+    - empty_db
+    - team_with_multiple_members
+
+  steps:
+    - name: remove_member_unauthorized
+      request:
+        method: DELETE
+        path: /api/v1/teams/1/members/2
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 3
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 2
+          result:
+            - user_id: 2
+
+- name: remove member from non-existent team
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: remove_member_nonexistent_team
+      request:
+        method: DELETE
+        path: /api/v1/teams/999/members/2
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 999
+          result:
+            - cnt: 0
+
+- name: remove non-existent member
+  fixtures:
+    - empty_db
+    - single_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: remove_nonexistent_member
+      request:
+        method: DELETE
+        path: /api/v1/teams/1/members/999
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 1
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 999
+          result: []
+
+- name: remove member with invalid team_id
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: remove_member_invalid_team_id
+      request:
+        method: DELETE
+        path: /api/v1/teams/invalid/members/2
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 0
+
+- name: remove member with invalid user_id
+  fixtures:
+    - empty_db
+    - single_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: remove_member_invalid_user_id
+      request:
+        method: DELETE
+        path: /api/v1/teams/1/members/invalid
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 1
+
+- name: remove member as admin
+  fixtures:
+    - empty_db
+    - team_with_multiple_members
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: remove_member_non_owner
+      request:
+        method: DELETE
+        path: /api/v1/teams/1/members/3
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 2
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 3
+          result: []
+
+- name: remove owner from team
+  fixtures:
+    - empty_db
+    - team_with_multiple_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: remove_owner
+      request:
+        method: DELETE
+        path: /api/v1/teams/1/members/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 403
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 3
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 1
+          result:
+            - user_id: 1
+
+- name: self-leave as owner (not last owner)
+  fixtures:
+    - empty_db
+    - team_with_multiple_owners
+  steps:
+    - name: auth_owner
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user3", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: leave_team
+      request:
+        method: DELETE
+        path: /api/v1/teams/1/members/4
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth_owner.response.access_token}}'
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 3
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 4
+          result: []
+
+- name: self-leave as last owner (should fail)
+  fixtures:
+    - empty_db
+    - single_team_not_superuser
+  steps:
+    - name: auth_owner
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: leave_team
+      request:
+        method: DELETE
+        path: /api/v1/teams/1/members/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth_owner.response.access_token}}'
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "cannot leave team as the last owner"
+            }
+          }
+
+- name: self-leave as admin, not superuser (should succeed)
+  fixtures:
+    - empty_db
+    - team_with_multiple_members
+  steps:
+    - name: auth_admin
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: leave_team
+      request:
+        method: DELETE
+        path: /api/v1/teams/1/members/2
+        headers:
+          Authorization: 'Bearer {{auth_admin.response.access_token}}'
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 2
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 2
+          result: []
+
+- name: self-leave as member (should succeed)
+  fixtures:
+    - empty_db
+    - team_with_multiple_members
+  steps:
+    - name: auth_member
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user2", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: leave_team
+      request:
+        method: DELETE
+        path: /api/v1/teams/1/members/3
+        headers:
+          Authorization: 'Bearer {{auth_member.response.access_token}}'
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM team_members WHERE team_id = 1
+          result:
+            - cnt: 2
+        - query: SELECT user_id FROM team_members WHERE team_id = 1 AND user_id = 3
+          result: []

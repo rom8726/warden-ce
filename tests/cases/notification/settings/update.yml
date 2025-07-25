@@ -1,0 +1,255 @@
+- name: success update notification setting
+  fixtures:
+    - empty_db
+    - project_with_notification_settings
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_setting
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"email", "config":"{\"email_to\":\"newadmin@warden.io\"}", "enabled":false}
+      response:
+        status: 200
+        json: |
+          {
+            "id": 1,
+            "project_id": 1,
+            "type": "email",
+            "config": "{\"email_to\": \"newadmin@warden.io\"}",
+            "enabled": false,
+            "created_at": "<<PRESENCE>>",
+            "updated_at": "<<PRESENCE>>"
+          }
+      dbChecks:
+        - query: SELECT type, config::text AS config_txt, enabled FROM notification_settings WHERE id = 1
+          result:
+            - type: "email"
+              config_txt: "{\"email_to\": \"newadmin@warden.io\"}"
+              enabled: false
+
+- name: update notification setting without auth
+  fixtures:
+    - empty_db
+    - project_with_notification_settings
+
+  steps:
+    - name: update_notification_setting_unauthorized
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/1
+        headers:
+          Content-Type: application/json
+        body: {"type":"email", "config":"{\"email_to\": \"newadmin@warden.io\"}", "enabled":false}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: update non-existent notification setting
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_nonexistent_notification_setting
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/999
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"email", "config":"{\"email_to\": \"newadmin@warden.io\"}", "enabled":false}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "get notification setting: entity not found"
+            }
+          }
+
+- name: update notification setting for non-existent project
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_setting_nonexistent_project
+      request:
+        method: PUT
+        path: /api/v1/projects/999/notification-settings/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"email", "config":"{\"email_to\": \"newadmin@warden.io\"}", "enabled":false}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+
+- name: update notification setting with invalid project_id
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_setting_invalid_project_id
+      request:
+        method: PUT
+        path: /api/v1/projects/invalid/notification-settings/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"email", "config":"{\"email_to\": \"newadmin@warden.io\"}", "enabled":false}
+      response:
+        status: 400
+
+- name: update notification setting with invalid setting_id
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_setting_invalid_setting_id
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/invalid
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"type":"email", "config":"{\"email_to\": \"newadmin@warden.io\"}", "enabled":false}
+      response:
+        status: 400
+
+- name: update notification setting with malformed JSON
+  fixtures:
+    - empty_db
+    - project_with_notification_settings
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_setting_malformed_json
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: '{"type":"email", "config":"{\"email_to\": \"newadmin@warden.io\"", "enabled":false}'
+      response:
+        status: 400
+
+- name: update notification setting with partial data
+  fixtures:
+    - empty_db
+    - project_with_notification_settings
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_setting_partial
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"enabled":false}
+      response:
+        status: 200
+        json: |
+          {
+            "id": 1,
+            "project_id": 1,
+            "type": "email",
+            "config": "{\"email_to\": \"admin@warden.io\"}",
+            "enabled": false,
+            "created_at": "<<PRESENCE>>",
+            "updated_at": "<<PRESENCE>>"
+          } 

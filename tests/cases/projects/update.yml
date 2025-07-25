@@ -1,0 +1,259 @@
+- name: success project update with team
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: update_project
+      request:
+        method: PUT
+        path: /api/v1/projects/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":"Updated Project Name", "description":"Updated project description"}
+      response:
+        status: 200
+        json: |
+          {
+            "project": {
+              "id": 1,
+              "name": "Updated Project Name",
+              "public_key": "418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1",
+              "description": "Updated project description",
+              "team_id": 1,
+              "team_name": "developers",
+              "created_at": "<<PRESENCE>>"
+            }
+          }
+      dbChecks:
+        - query: SELECT name, description FROM projects WHERE id = 1
+          result:
+            - name: "Updated Project Name"
+              description: "Updated project description"
+
+- name: success project update without team
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: update_project
+      request:
+        method: PUT
+        path: /api/v1/projects/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":"Updated No Team Project", "description":"Updated description for project without team"}
+      response:
+        status: 200
+        json: |
+          {
+            "project": {
+              "id": 1,
+              "name": "Updated No Team Project",
+              "public_key": "418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1",
+              "description": "Updated description for project without team",
+              "created_at": "<<PRESENCE>>"
+            }
+          }
+      dbChecks:
+        - query: SELECT name, description FROM projects WHERE id = 1
+          result:
+            - name: "Updated No Team Project"
+              description: "Updated description for project without team"
+
+- name: update project without auth
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: update_project_unauthorized
+      request:
+        method: PUT
+        path: /api/v1/projects/1
+        headers:
+          Content-Type: application/json
+        body: {"name":"Unauthorized Update", "description":"This update should fail"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+      dbChecks:
+        - query: SELECT name, description FROM projects WHERE id = 1
+          result:
+            - name: "Project1"
+              description: "Some project"
+
+- name: update non-existent project
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: update_nonexistent_project
+      request:
+        method: PUT
+        path: /api/v1/projects/999
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":"Nonexistent Project", "description":"This project doesn't exist"}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+
+- name: update project without permission
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"dev4", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: update_project_without_permission
+      request:
+        method: PUT
+        path: /api/v1/projects/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":"No Permission Update", "description":"This update should fail due to permissions"}
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "permission denied"
+            }
+          }
+      dbChecks:
+        - query: SELECT name, description FROM projects WHERE id = 1
+          result:
+            - name: "Project1"
+              description: "Some project"
+
+- name: update project with invalid data - short name
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: update_project_short_name
+      request:
+        method: PUT
+        path: /api/v1/projects/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":"A", "description":"Valid description that is long enough"}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT name, description FROM projects WHERE id = 1
+          result:
+            - name: "Project1"
+              description: "Some project"
+
+- name: update project with invalid data - short description
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: update_project_short_description
+      request:
+        method: PUT
+        path: /api/v1/projects/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":"Valid Name", "description":"Short"}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT name, description FROM projects WHERE id = 1
+          result:
+            - name: "Project1"
+              description: "Some project"

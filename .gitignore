@@ -17,6 +17,8 @@ coverage.*
 *.coverprofile
 profile.cov
 
+*.db
+
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
@@ -28,5 +30,13 @@ go.work.sum
 .env
 
 # Editor/IDE
-# .idea/
-# .vscode/
+.idea/
+.vscode/
+
+bin/
+
+dev/config.env
+dev/compose.env
+dev/license_server.env
+dev/secrets
+dev/license-server/

@@ -1,0 +1,55 @@
+- name: get versions without authentication
+  fixtures:
+    - empty_db
+
+  steps:
+    - name: get_versions
+      request:
+        method: GET
+        path: /api/v1/versions
+        headers:
+          Content-Type: application/json
+      response:
+        status: 200
+        json: |
+          {
+            "components": [
+              {
+                "name": "backend",
+                "version": "<<PRESENCE>>",
+                "build_time": "<<PRESENCE>>",
+                "status": "available"
+              },
+              {
+                "name": "envelope-consumer",
+                "version": "<<PRESENCE>>",
+                "build_time": "<<PRESENCE>>",
+                "status": "available"
+              },
+              {
+                "name": "ingest-server",
+                "version": "<<PRESENCE>>",
+                "build_time": "<<PRESENCE>>",
+                "status": "available"
+              },
+              {
+                "name": "issue-notificator",
+                "version": "<<PRESENCE>>",
+                "build_time": "<<PRESENCE>>",
+                "status": "available"
+              },
+              {
+                "name": "user-notificator",
+                "version": "<<PRESENCE>>",
+                "build_time": "<<PRESENCE>>",
+                "status": "available"
+              },
+              {
+                "name": "scheduler",
+                "version": "<<PRESENCE>>",
+                "build_time": "<<PRESENCE>>",
+                "status": "available"
+              }
+            ],
+            "collected_at": "<<PRESENCE>>"
+          } 

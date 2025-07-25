@@ -1,0 +1,235 @@
+- name: success delete user as superuser
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: delete_user
+      request:
+        method: DELETE
+        path: /api/v1/users/2
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM users
+          result:
+            - cnt: 2
+        - query: SELECT id FROM users WHERE id = 2
+          result: []
+
+- name: delete user without auth
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: delete_user_unauthorized
+      request:
+        method: DELETE
+        path: /api/v1/users/2
+        headers:
+          Content-Type: application/json
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM users
+          result:
+            - cnt: 3
+        - query: SELECT id FROM users WHERE id = 2
+          result:
+            - id: 2
+
+- name: delete user as regular user
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: delete_user_forbidden
+      request:
+        method: DELETE
+        path: /api/v1/users/3
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "Only superusers can create new users"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM users
+          result:
+            - cnt: 3
+        - query: SELECT id FROM users WHERE id = 3
+          result:
+            - id: 3
+
+- name: delete non-existent user
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: delete_nonexistent_user
+      request:
+        method: DELETE
+        path: /api/v1/users/999
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 404
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM users
+          result:
+            - cnt: 1
+        - query: SELECT id FROM users WHERE id = 999
+          result: []
+
+- name: delete superuser (should fail)
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: delete_superuser
+      request:
+        method: DELETE
+        path: /api/v1/users/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "Only superusers can create new users"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM users
+          result:
+            - cnt: 3
+        - query: SELECT id FROM users WHERE id = 1
+          result:
+            - id: 1
+
+- name: delete user with invalid user_id
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: delete_user_invalid_id
+      request:
+        method: DELETE
+        path: /api/v1/users/invalid
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM users
+          result:
+            - cnt: 1
+
+- name: delete user with negative user_id
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: delete_user_negative_id
+      request:
+        method: DELETE
+        path: /api/v1/users/-1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM users
+          result:
+            - cnt: 1

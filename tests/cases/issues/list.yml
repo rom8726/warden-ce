@@ -1,0 +1,330 @@
+- name: get all issues (page 1, per_page=2)
+  fixtures:
+    - project_with_issues
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_issues_page_1
+      request:
+        method: GET
+        path: /api/v1/issues?per_page=2&page=1
+        headers:
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "issues": [
+              {
+                "id": 1,
+                "project_id": 1,
+                "project_name": "Project1",
+                "source": "event",
+                "status": "unresolved",
+                "title": "TypeError: Cannot read property of undefined",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 15,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 2,
+                "project_id": 1,
+                "project_name": "Project1",
+                "source": "event",
+                "status": "unresolved",
+                "title": "ReferenceError: variable is not defined",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 8,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              }
+            ],
+            "total": 3,
+            "page": 1,
+            "per_page": 2
+          }
+
+- name: get all issues (page 2, per_page=2)
+  fixtures:
+    - project_with_issues
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_issues_page_2
+      request:
+        method: GET
+        path: /api/v1/issues?per_page=2&page=2
+        headers:
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "issues": [
+              {
+                "id": 3,
+                "project_id": 1,
+                "project_name": "Project1",
+                "source": "event",
+                "status": "unresolved",
+                "title": "Warning: Deprecated function used",
+                "message": "<<PRESENCE>>",
+                "level": "warning",
+                "platform": "javascript",
+                "count": 3,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              }
+            ],
+            "total": 3,
+            "page": 2,
+            "per_page": 2
+          }
+
+- name: get issues with filter by level
+  fixtures:
+    - project_with_issues
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_issues_error_level
+      request:
+        method: GET
+        path: /api/v1/issues?level=error&per_page=10&page=1
+        headers:
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "issues": [
+              {
+                "id": 1,
+                "project_id": 1,
+                "project_name": "Project1",
+                "source": "event",
+                "status": "unresolved",
+                "title": "TypeError: Cannot read property of undefined",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 15,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 2,
+                "project_id": 1,
+                "project_name": "Project1",
+                "source": "event",
+                "status": "unresolved",
+                "title": "ReferenceError: variable is not defined",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 8,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              }
+            ],
+            "total": 2,
+            "page": 1,
+            "per_page": 10
+          }
+
+- name: get issues with filter by project_id
+  fixtures:
+    - project_with_issues
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_issues_by_project
+      request:
+        method: GET
+        path: /api/v1/issues?project_id=1&per_page=10&page=1
+        headers:
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "issues": [
+              {
+                "id": 1,
+                "project_id": 1,
+                "project_name": "Project1",
+                "source": "event",
+                "status": "unresolved",
+                "title": "TypeError: Cannot read property of undefined",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 15,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 2,
+                "project_id": 1,
+                "project_name": "Project1",
+                "source": "event",
+                "status": "unresolved",
+                "title": "ReferenceError: variable is not defined",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 8,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 3,
+                "project_id": 1,
+                "project_name": "Project1",
+                "source": "event",
+                "status": "unresolved",
+                "title": "Warning: Deprecated function used",
+                "message": "<<PRESENCE>>",
+                "level": "warning",
+                "platform": "javascript",
+                "count": 3,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              }
+            ],
+            "total": 3,
+            "page": 1,
+            "per_page": 10
+          }
+
+- name: get issues with filter by status
+  fixtures:
+    - project_with_issues
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: get_issues_by_status
+      request:
+        method: GET
+        path: /api/v1/issues?status=unresolved&per_page=10&page=1
+        headers:
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "issues": [
+              {
+                "id": 1,
+                "project_id": 1,
+                "project_name": "Project1",
+                "source": "event",
+                "status": "unresolved",
+                "title": "TypeError: Cannot read property of undefined",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 15,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 2,
+                "project_id": 1,
+                "project_name": "Project1",
+                "source": "event",
+                "status": "unresolved",
+                "title": "ReferenceError: variable is not defined",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 8,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 3,
+                "project_id": 1,
+                "project_name": "Project1",
+                "source": "event",
+                "status": "unresolved",
+                "title": "Warning: Deprecated function used",
+                "message": "<<PRESENCE>>",
+                "level": "warning",
+                "platform": "javascript",
+                "count": 3,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              }
+            ],
+            "total": 3,
+            "page": 1,
+            "per_page": 10
+          }
+
+- name: get issues without auth
+  fixtures:
+    - project_with_issues
+  steps:
+    - name: get_issues_unauthorized
+      request:
+        method: GET
+        path: /api/v1/issues?per_page=10&page=1
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }

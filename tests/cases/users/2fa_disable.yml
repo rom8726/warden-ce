@@ -1,0 +1,187 @@
+- name: success disable 2FA
+  fixtures:
+    - empty_db
+    - admin_user_with_2fa
+
+  steps:
+    - name: login_with_2fa
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: { "username": "admin", "password": "WardenQwe321!" }
+      response:
+        status: 403
+        headers:
+          Content-Type: application/json
+        json: |
+          {
+            "error": {
+              "code": "2fa_required",
+              "session_id": "<<PRESENCE>>",
+              "message": "2FA required"
+            }
+          }
+    - name: verify_2fa
+      request:
+        method: POST
+        path: /api/v1/auth/2fa/verify
+        headers:
+          Content-Type: application/json
+        body: { "code": "123456", "session_id": "{{login_with_2fa.response.error.session_id}}" }
+      response:
+        status: 200
+        json: |
+          {
+            "access_token": "<<PRESENCE>>",
+            "refresh_token": "<<PRESENCE>>",
+            "expires_in": "<<PRESENCE>>"
+          }
+      dbChecks:
+        - query: SELECT two_fa_enabled FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: true
+    - name: send_disable_code
+      request:
+        method: POST
+        path: /api/v1/users/me/2fa/send_code
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{verify_2fa.response.access_token}}'
+      response:
+        status: 204
+    - name: disable_2fa
+      request:
+        method: POST
+        path: /api/v1/users/me/2fa/disable
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{verify_2fa.response.access_token}}'
+        body: {"email_code":"654321"}
+      response:
+        status: 204
+      dbChecks:
+        - query: SELECT two_fa_enabled FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: false
+
+- name: disable 2FA without auth
+  fixtures:
+    - empty_db
+    - admin_user_with_2fa
+
+  steps:
+    - name: disable_2fa_unauthorized
+      request:
+        method: POST
+        path: /api/v1/users/me/2fa/disable
+        headers:
+          Content-Type: application/json
+        body: {"email_code":"123456"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+      dbChecks:
+        - query: SELECT two_fa_enabled FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: true
+
+- name: try to disable 2FA with wrong email code
+  fixtures:
+    - empty_db
+    - admin_user_with_2fa
+
+  steps:
+    - name: login_with_2fa
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: { "username": "admin", "password": "WardenQwe321!" }
+      response:
+        status: 403
+        headers:
+          Content-Type: application/json
+        json: |
+          {
+            "error": {
+              "code": "2fa_required",
+              "session_id": "<<PRESENCE>>",
+              "message": "2FA required"
+            }
+          }
+    - name: verify_2fa
+      request:
+        method: POST
+        path: /api/v1/auth/2fa/verify
+        headers:
+          Content-Type: application/json
+        body: { "code": "123456", "session_id": "{{login_with_2fa.response.error.session_id}}" }
+      response:
+        status: 200
+        json: |
+          {
+            "access_token": "<<PRESENCE>>",
+            "refresh_token": "<<PRESENCE>>",
+            "expires_in": "<<PRESENCE>>"
+          }
+      dbChecks:
+        - query: SELECT two_fa_enabled FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: true
+    - name: send_disable_code
+      request:
+        method: POST
+        path: /api/v1/users/me/2fa/send_code
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{verify_2fa.response.access_token}}'
+      response:
+        status: 204
+    - name: disable_2fa
+      request:
+        method: POST
+        path: /api/v1/users/me/2fa/disable
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{verify_2fa.response.access_token}}'
+        body: {"email_code":"000000"}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT two_fa_enabled FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: true
+
+- name: disable 2FA without auth
+  fixtures:
+    - empty_db
+    - admin_user_with_2fa
+
+  steps:
+    - name: disable_2fa_unauthorized
+      request:
+        method: POST
+        path: /api/v1/users/me/2fa/disable
+        headers:
+          Content-Type: application/json
+        body: {"email_code":"123456"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+      dbChecks:
+        - query: SELECT two_fa_enabled FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: true

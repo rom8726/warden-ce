@@ -1,0 +1,297 @@
+- name: success set user as superuser
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: set_user_superuser
+      request:
+        method: PUT
+        path: /api/v1/users/2/superuser
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"is_superuser":true}
+      response:
+        status: 200
+        json: |
+          {
+            "id": 2,
+            "username": "user1",
+            "email": "user1@warden.io",
+            "is_superuser": true,
+            "is_active": true,
+            "is_tmp_password": false,
+            "two_fa_enabled": false,
+            "created_at": "<<PRESENCE>>",
+            "last_login": "<<PRESENCE>>",
+            "teams": []
+          }
+      dbChecks:
+        - query: SELECT is_superuser FROM users WHERE id = 2
+          result:
+            - is_superuser: true
+
+- name: success unset user superuser status
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: unset_user_superuser
+      request:
+        method: PUT
+        path: /api/v1/users/2/superuser
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"is_superuser":false}
+      response:
+        status: 200
+        json: |
+          {
+            "id": 2,
+            "username": "user1",
+            "email": "user1@warden.io",
+            "is_superuser": false,
+            "is_active": true,
+            "is_tmp_password": false,
+            "two_fa_enabled": false,
+            "created_at": "<<PRESENCE>>",
+            "last_login": "<<PRESENCE>>",
+            "teams": []
+          }
+      dbChecks:
+        - query: SELECT is_superuser FROM users WHERE id = 2
+          result:
+            - is_superuser: false
+
+- name: set superuser status without auth
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: set_superuser_unauthorized
+      request:
+        method: PUT
+        path: /api/v1/users/2/superuser
+        headers:
+          Content-Type: application/json
+        body: {"is_superuser":true}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: set superuser status as regular user
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user1", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: set_superuser_forbidden
+      request:
+        method: PUT
+        path: /api/v1/users/3/superuser
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"is_superuser":true}
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "forbidden"
+            }
+          }
+
+- name: set superuser status for non-existent user
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: set_superuser_nonexistent
+      request:
+        method: PUT
+        path: /api/v1/users/999/superuser
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"is_superuser":true}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "get user by id: entity not found"
+            }
+          }
+
+- name: set superuser status for admin user (should fail)
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: set_admin_superuser
+      request:
+        method: PUT
+        path: /api/v1/users/1/superuser
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"is_superuser":false}
+      response:
+        status: 403
+        json: |
+          {
+            "error": {
+              "message": "forbidden"
+            }
+          }
+
+- name: set superuser status with invalid user_id
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: set_superuser_invalid_id
+      request:
+        method: PUT
+        path: /api/v1/users/invalid/superuser
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"is_superuser":true}
+      response:
+        status: 400
+
+- name: set superuser status with missing is_superuser field
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: set_superuser_missing_field
+      request:
+        method: PUT
+        path: /api/v1/users/2/superuser
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {}
+      response:
+        status: 400
+
+- name: set superuser status with malformed JSON
+  fixtures:
+    - empty_db
+    - multiple_users
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: set_superuser_malformed_json
+      request:
+        method: PUT
+        path: /api/v1/users/2/superuser
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: '{"is_superuser":true'
+      response:
+        status: 400

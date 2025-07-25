@@ -1,0 +1,190 @@
+- name: issues from archived project are excluded from all queries
+  fixtures:
+    - empty_db
+    - multiple_teams_with_issues
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+
+    - name: archive_team1_project
+      request:
+        method: DELETE
+        path: /api/v1/projects/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 204
+
+    - name: list_issues
+      request:
+        method: GET
+        path: /api/v1/issues?per_page=10&page=1
+        headers:
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "issues": [
+              {
+                "id": 4,
+                "project_id": 2,
+                "project_name": "team2_project",
+                "source": "event",
+                "status": "unresolved",
+                "title": "Team2 Project Issue 2",
+                "message": "<<PRESENCE>>",
+                "level": "fatal",
+                "platform": "javascript",
+                "count": 5,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 3,
+                "project_id": 2,
+                "project_name": "team2_project",
+                "source": "event",
+                "status": "unresolved",
+                "title": "Team2 Project Issue 1",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 12,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 5,
+                "project_id": 3,
+                "project_name": "public_project",
+                "source": "event",
+                "status": "unresolved",
+                "title": "Public Project Issue 1",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 10,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              }
+            ],
+            "total": 3,
+            "page": 1,
+            "per_page": 10
+          }
+
+    - name: recent_issues
+      request:
+        method: GET
+        path: /api/v1/issues/recent?limit=5
+        headers:
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "issues": [
+              {
+                "id": 4,
+                "project_id": 2,
+                "title": "Team2 Project Issue 2",
+                "level": "fatal",
+                "count": 5,
+                "last_seen": "<<PRESENCE>>",
+                "platform": "javascript"
+              },
+              {
+                "id": 3,
+                "project_id": 2,
+                "title": "Team2 Project Issue 1",
+                "level": "error",
+                "count": 12,
+                "last_seen": "<<PRESENCE>>",
+                "platform": "javascript"
+              },
+              {
+                "id": 5,
+                "project_id": 3,
+                "title": "Public Project Issue 1",
+                "level": "error",
+                "count": 10,
+                "last_seen": "<<PRESENCE>>",
+                "platform": "javascript"
+              }
+            ]
+          }
+
+    - name: unresolved_issues
+      request:
+        method: GET
+        path: /api/v1/issues?status=unresolved&per_page=10&page=1
+        headers:
+          Authorization: 'Bearer {{auth.response.access_token}}'
+      response:
+        status: 200
+        json: |
+          {
+            "issues": [
+              {
+                "id": 4,
+                "project_id": 2,
+                "project_name": "team2_project",
+                "source": "event",
+                "status": "unresolved",
+                "title": "Team2 Project Issue 2",
+                "message": "<<PRESENCE>>",
+                "level": "fatal",
+                "platform": "javascript",
+                "count": 5,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 3,
+                "project_id": 2,
+                "project_name": "team2_project",
+                "source": "event",
+                "status": "unresolved",
+                "title": "Team2 Project Issue 1",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 12,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              },
+              {
+                "id": 5,
+                "project_id": 3,
+                "project_name": "public_project",
+                "source": "event",
+                "status": "unresolved",
+                "title": "Public Project Issue 1",
+                "message": "<<PRESENCE>>",
+                "level": "error",
+                "platform": "javascript",
+                "count": 10,
+                "first_seen": "<<PRESENCE>>",
+                "last_seen": "<<PRESENCE>>"
+              }
+            ],
+            "total": 3,
+            "page": 1,
+            "per_page": 10
+          }
+      dbChecks:
+        - query: SELECT archived_at FROM projects WHERE id = 1
+          result:
+            - archived_at: "<<PRESENCE>>"

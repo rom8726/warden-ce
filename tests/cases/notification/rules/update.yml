@@ -1,0 +1,326 @@
+- name: success update notification rule
+  fixtures:
+    - empty_db
+    - project_with_notification_rules
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_rule
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/1/rules/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"event_level":"warning", "fingerprint":"newfingerprint123", "is_new_error":false, "is_regression":true}
+      response:
+        status: 200
+        json: |
+          {
+            "id": 1,
+            "notification_setting_id": 1,
+            "event_level": "warning",
+            "fingerprint": "newfingerprint123",
+            "is_new_error": false,
+            "is_regression": true,
+            "created_at": "<<PRESENCE>>"
+          }
+      dbChecks:
+        - query: SELECT event_level, fingerprint, is_new_error, is_regression FROM notification_rules WHERE id = 1
+          result:
+            - event_level: "warning"
+              fingerprint: "newfingerprint123"
+              is_new_error: false
+              is_regression: true
+
+- name: update notification rule without auth
+  fixtures:
+    - empty_db
+    - project_with_notification_rules
+
+  steps:
+    - name: update_notification_rule_unauthorized
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/1/rules/1
+        headers:
+          Content-Type: application/json
+        body: {"event_level":"warning", "fingerprint":"newfingerprint123", "is_new_error":false, "is_regression":true}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+
+- name: update non-existent notification rule
+  fixtures:
+    - empty_db
+    - project_with_notification_settings
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_nonexistent_notification_rule
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/1/rules/999
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"event_level":"warning", "fingerprint":"newfingerprint123", "is_new_error":false, "is_regression":true}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "get notification rule: entity not found"
+            }
+          }
+
+- name: update notification rule for non-existent project
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_rule_nonexistent_project
+      request:
+        method: PUT
+        path: /api/v1/projects/999/notification-settings/1/rules/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"event_level":"warning", "fingerprint":"newfingerprint123", "is_new_error":false, "is_regression":true}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "entity not found"
+            }
+          }
+
+- name: update notification rule for non-existent setting
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_rule_nonexistent_setting
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/999/rules/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"event_level":"warning", "fingerprint":"newfingerprint123", "is_new_error":false, "is_regression":true}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "get notification rule: entity not found"
+            }
+          }
+
+- name: update notification rule with invalid project_id
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_rule_invalid_project_id
+      request:
+        method: PUT
+        path: /api/v1/projects/invalid/notification-settings/1/rules/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"event_level":"warning", "fingerprint":"newfingerprint123", "is_new_error":false, "is_regression":true}
+      response:
+        status: 400
+
+- name: update notification rule with invalid setting_id
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_rule_invalid_setting_id
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/invalid/rules/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"event_level":"warning", "fingerprint":"newfingerprint123", "is_new_error":false, "is_regression":true}
+      response:
+        status: 400
+
+- name: update notification rule with invalid rule_id
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_rule_invalid_rule_id
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/1/rules/invalid
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"event_level":"warning", "fingerprint":"newfingerprint123", "is_new_error":false, "is_regression":true}
+      response:
+        status: 400
+
+- name: update notification rule with partial data
+  fixtures:
+    - empty_db
+    - project_with_notification_rules
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_rule_partial
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/1/rules/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"event_level":"info"}
+      response:
+        status: 200
+        json: |
+          {
+            "id": 1,
+            "notification_setting_id": 1,
+            "event_level": "info",
+            "is_new_error": true,
+            "is_regression": false,
+            "created_at": "<<PRESENCE>>"
+          }
+
+- name: update notification rule with empty body
+  fixtures:
+    - empty_db
+    - project_with_notification_rules
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: update_notification_rule_empty_body
+      request:
+        method: PUT
+        path: /api/v1/projects/1/notification-settings/1/rules/1
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {}
+      response:
+        status: 200
+        json: |
+          {
+            "id": 1,
+            "notification_setting_id": 1,
+            "event_level": "error",
+            "is_new_error": true,
+            "is_regression": false,
+            "created_at": "<<PRESENCE>>"
+          } 

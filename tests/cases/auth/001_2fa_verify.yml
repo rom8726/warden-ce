@@ -1,0 +1,163 @@
+- name: success verify 2FA during login
+  fixtures:
+    - empty_db
+    - admin_user_with_2fa
+
+  steps:
+    - name: login_with_2fa
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 403
+        headers:
+          Content-Type: application/json
+        json: |
+          {
+            "error": {
+              "code": "2fa_required",
+              "session_id": "<<PRESENCE>>",
+              "message": "2FA required"
+            }
+          }
+    - name: verify_2fa
+      request:
+        method: POST
+        path: /api/v1/auth/2fa/verify
+        headers:
+          Content-Type: application/json
+        body: {"code":"123456", "session_id":"{{login_with_2fa.response.error.session_id}}"}
+      response:
+        status: 200
+        json: |
+          {
+            "access_token": "<<PRESENCE>>",
+            "refresh_token": "<<PRESENCE>>",
+            "expires_in": "<<PRESENCE>>"
+          }
+      dbChecks:
+        - query: SELECT two_fa_enabled, two_fa_secret FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: true
+              two_fa_secret: "<<PRESENCE>>"
+
+- name: verify 2FA with invalid code
+  fixtures:
+    - empty_db
+    - admin_user_with_2fa
+
+  steps:
+    - name: login_with_2fa
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 403
+        headers:
+          Content-Type: application/json
+        json: |
+          {
+            "error": {
+              "code": "2fa_required",
+              "session_id": "<<PRESENCE>>",
+              "message": "2FA required"
+            }
+          }
+    - name: verify_2fa_invalid_code
+      request:
+        method: POST
+        path: /api/v1/auth/2fa/verify
+        headers:
+          Content-Type: application/json
+        body: {"code":"000000", "session_id":"{{login_with_2fa.response.error.session_id}}"}
+      response:
+        status: 400
+        json: |
+          {
+            "error": {
+              "message": "invalid code"
+            }
+          }
+      dbChecks:
+        - query: SELECT two_fa_enabled, two_fa_secret FROM users WHERE username = 'admin'
+          result:
+            - two_fa_enabled: true
+              two_fa_secret: "<<PRESENCE>>"
+
+- name: verify 2FA with missing code
+  fixtures:
+    - empty_db
+    - admin_user_with_2fa
+
+  steps:
+    - name: verify_2fa_missing_code
+      request:
+        method: POST
+        path: /api/v1/auth/2fa/verify
+        headers:
+          Content-Type: application/json
+        body: {"session_id":"invalid_session"}
+      response:
+        status: 400
+        json: |
+          {
+            "error_message": "<<PRESENCE>>"
+          }
+
+- name: verify 2FA with missing session_id
+  fixtures:
+    - empty_db
+    - admin_user_with_2fa
+
+  steps:
+    - name: verify_2fa_missing_session_id
+      request:
+        method: POST
+        path: /api/v1/auth/2fa/verify
+        headers:
+          Content-Type: application/json
+        body: {"code":"123456"}
+      response:
+        status: 400
+        json: |
+          {
+            "error_message": "<<PRESENCE>>"
+          }
+
+- name: verify 2FA with empty code
+  fixtures:
+    - empty_db
+    - admin_user_with_2fa
+
+  steps:
+    - name: verify_2fa_empty_code
+      request:
+        method: POST
+        path: /api/v1/auth/2fa/verify
+        headers:
+          Content-Type: application/json
+        body: {"code":"", "session_id":"invalid_session"}
+      response:
+        status: 401
+
+- name: verify 2FA with malformed JSON
+  fixtures:
+    - empty_db
+    - admin_user_with_2fa
+
+  steps:
+    - name: verify_2fa_malformed_json
+      request:
+        method: POST
+        path: /api/v1/auth/2fa/verify
+        headers:
+          Content-Type: application/json
+        body: "invalid json"
+      response:
+        status: 400

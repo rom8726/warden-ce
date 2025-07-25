@@ -1,0 +1,143 @@
+- name: envelope with multiple items
+  fixtures:
+    - empty_db
+    - project_with_team
+
+  steps:
+    - name: send_multi_item_envelope
+      request:
+        method: POST
+        path: /api/1/envelope/
+        headers:
+          Content-Type: application/x-sentry-envelope
+          Content-Length: 1261
+          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"multi123456","dsn":"https://123456@warden.example.com/42","sent_at":"2025-06-07T12:00:00Z"}
+          {"type":"event","length":131}
+          {"event_id":"multi123456","timestamp":"2025-06-07T11:59:59Z","platform":"javascript","level":"error","message":"First error event"}
+          {"type":"event","length":136}
+          {"event_id":"multi789012","timestamp":"2025-06-07T12:00:01Z","platform":"javascript","level":"warning","message":"Second warning event"}
+      response:
+        status: 200
+        body: "OK"
+      dbChecks:
+        - query: SELECT COUNT(*) AS count FROM issues WHERE platform = 'javascript'
+          result: |
+            [{"count": 2}]
+        - query: SELECT level::TEXT FROM issues WHERE title = 'First error event'
+          result: |
+            [{"level": "error"}]
+        - query: SELECT level::TEXT FROM issues WHERE title = 'Second warning event'
+          result: |
+            [{"level": "warning"}]
+
+- name: envelope with unsupported item type
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: send_unsupported_item
+      request:
+        method: POST
+        path: /api/1/envelope/
+        headers:
+          Content-Type: application/x-sentry-envelope
+          Content-Length: 1261
+          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"unsupported123","dsn":"https://123456@warden.example.com/42","sent_at":"2025-06-07T12:00:00Z"}
+          {"type":"unsupported_type","length":30}
+          {"data":"unsupported content"}
+      response:
+        status: 200
+        body: "OK"
+
+- name: envelope with missing item length
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: send_missing_length
+      request:
+        method: POST
+        path: /api/1/envelope/
+        headers:
+          Content-Type: application/x-sentry-envelope
+          Content-Length: 1261
+          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"nolength123","dsn":"https://123456@warden.example.com/42","sent_at":"2025-06-07T12:00:00Z"}
+          {"type":"event","length":52}
+          {"event_id": "nolength123", "message": "Test event"}
+      response:
+        status: 200
+        body: "OK"
+
+#- name: envelope with different error levels
+#  fixtures:
+#    - empty_db
+#    - project_without_team
+#
+#  steps:
+#    - name: send_fatal_error
+#      request:
+#        method: POST
+#        path: /api/1/envelope/
+#        headers:
+#          Content-Type: application/x-sentry-envelope
+#          Content-Length: 1261
+#          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+#        bodyRaw: |
+#          {"event_id":"fatal123","dsn":"https://123456@warden.example.com/42","sent_at":"2025-06-07T12:00:00Z"}
+#          {"type":"event","length":235}
+#          {"event_id":"fatal123","timestamp":"2025-06-07T11:59:59Z","platform":"javascript","level":"fatal","environment":"production","message":"Fatal error occurred","exception":{"values":[{"type":"FatalError","value":"Application crashed"}]}}
+#      response:
+#        status: 200
+#        body: "OK"
+#      dbChecks:
+#        - query: SELECT level::TEXT, title, source::TEXT, status::TEXT FROM issues WHERE title = 'Fatal error occurred'
+#          result: |
+#            [{"level": "exception", "title": "Fatal error occurred", "source": "exception", "status": "unresolved"}]
+#
+#    - name: send_warning
+#      request:
+#        method: POST
+#        path: /api/1/envelope/
+#        headers:
+#          Content-Type: application/x-sentry-envelope
+#          Content-Length: 1261
+#          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+#        bodyRaw: |
+#          {"event_id":"warning123","dsn":"https://123456@warden.example.com/42","sent_at":"2025-06-07T12:00:00Z"}
+#          {"type":"event","length":157}
+#          {"event_id":"warning123","timestamp":"2025-06-07T11:59:59Z","platform":"javascript","level":"warning","environment":"production","message":"Warning message"}
+#      response:
+#        status: 200
+#        body: "OK"
+#      dbChecks:
+#        - query: SELECT level::TEXT, title, source::TEXT, status::TEXT FROM issues WHERE title = 'Warning message'
+#          result: |
+#            [{"level": "warning", "title": "Warning message", "source": "event", "status": "unresolved"}]
+#
+#    - name: send_info
+#      request:
+#        method: POST
+#        path: /api/1/envelope/
+#        headers:
+#          Content-Type: application/x-sentry-envelope
+#          Content-Length: 1261
+#          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+#        bodyRaw: |
+#          {"event_id":"info123","dsn":"https://123456@warden.example.com/42","sent_at":"2025-06-07T12:00:00Z"}
+#          {"type":"event","length":157}
+#          {"event_id":"info123","timestamp":"2025-06-07T11:59:59Z","platform":"javascript","level":"info","environment":"production","message":"Informational message"}
+#      response:
+#        status: 200
+#        body: "OK"
+#      dbChecks:
+#        - query: SELECT level::TEXT, title, source::TEXT, status::TEXT FROM issues WHERE title = 'Informational message'
+#          result: |
+#            [{"level": "info", "title": "Informational message", "source": "event", "status": "unresolved"}]

@@ -1,0 +1,103 @@
+- name: envelope from different platforms
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: send_python_error
+      request:
+        method: POST
+        path: /api/1/envelope/
+        headers:
+          Content-Type: application/x-sentry-envelope
+          Content-Length: 1261
+          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"python123","dsn":"https://123456@warden.example.com/42","sent_at":"2025-06-07T12:00:00Z"}
+          {"type":"event","length":493}
+          {"event_id":"python123","timestamp":"2025-06-07T11:59:59Z","platform":"python","level":"error","environment":"production","server_name":"api-server-01","release":"backend@1.5.2","exception":{"values":[{"type":"ZeroDivisionError","value":"division by zero","module":"app.services.calculator","stacktrace":{"frames":[{"filename":"app/services/calculator.py","function":"divide","lineno":42,"in_app":true},{"filename":"app/api/endpoints.py","function":"calculate","lineno":24,"in_app":true}]}}]}}
+      response:
+        status: 200
+        body: "OK"
+      dbChecks:
+        - query: SELECT COUNT(*) AS count FROM issues WHERE platform = 'python'
+          result: |
+            [{"count": 1}]
+        - query: SELECT level::TEXT, source::TEXT, status::TEXT, fingerprint::TEXT FROM issues WHERE platform = 'python'
+          result: |
+            [{"level": "exception", "source": "exception", "status": "unresolved", "fingerprint": "<<PRESENCE>>"}]
+
+    - name: send_android_error
+      request:
+        method: POST
+        path: /api/1/envelope/
+        headers:
+          Content-Type: application/x-sentry-envelope
+          Content-Length: 1261
+          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"android123","dsn":"https://123456@warden.example.com/42","sent_at":"2025-06-07T12:00:00Z"}
+          {"type":"event","length":545}
+          {"event_id":"android123","timestamp":"2025-06-07T11:59:59Z","platform":"android","level":"error","environment":"production","release":"com.example.app@2.3.0","dist":"23","contexts":{"os":{"name":"Android","version":"13","build":"TP1A.220624.014"},"device":{"family":"Pixel","model":"Pixel 6","brand":"Google"}},"exception":{"values":[{"type":"NullPointerException","value":"Attempt to invoke virtual method on a null object reference","stacktrace":{"frames":[{"filename":"MainActivity.java","function":"onCreate","lineno":35,"in_app":true}]}}]}}
+      response:
+        status: 200
+        body: "OK"
+      dbChecks:
+        - query: SELECT COUNT(*) AS count FROM issues WHERE platform = 'android'
+          result: |
+            [{"count": 1}]
+        - query: SELECT level::TEXT, source::TEXT, status::TEXT, fingerprint::TEXT FROM issues WHERE platform = 'android'
+          result: |
+            [{"level": "exception", "source": "exception", "status": "unresolved", "fingerprint": "<<PRESENCE>>"}]
+
+    - name: send_ios_error
+      request:
+        method: POST
+        path: /api/1/envelope/
+        headers:
+          Content-Type: application/x-sentry-envelope
+          Content-Length: 1261
+          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"ios123","dsn":"https://123456@warden.example.com/42","sent_at":"2025-06-07T12:00:00Z"}
+          {"type":"event","length":533}
+          {"event_id":"ios123","timestamp":"2025-06-07T11:59:59Z","platform":"cocoa","level":"error","environment":"production","release":"com.example.app@3.1.2","dist":"42","contexts":{"os":{"name":"iOS","version":"16.5","build":"20F66"},"device":{"family":"iPhone","model":"iPhone14,3","arch":"arm64"}},"exception":{"values":[{"type":"NSInvalidArgumentException","value":"Unexpected nil value","stacktrace":{"frames":[{"filename":"AppDelegate.swift","function":"application(_:didFinishLaunchingWithOptions:)","lineno":22,"in_app":true}]}}]}}
+      response:
+        status: 200
+        body: "OK"
+      dbChecks:
+        - query: SELECT COUNT(*) AS count FROM issues WHERE platform = 'cocoa'
+          result: |
+            [{"count": 1}]
+        - query: SELECT level::TEXT, source::TEXT, status::TEXT, fingerprint::TEXT FROM issues WHERE platform = 'cocoa'
+          result: |
+            [{"level": "exception", "source": "exception", "status": "unresolved", "fingerprint": "<<PRESENCE>>"}]
+
+- name: envelope with user context
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: send_with_user_context
+      request:
+        method: POST
+        path: /api/1/envelope/
+        headers:
+          Content-Type: application/x-sentry-envelope
+          Content-Length: 1261
+          X-Sentry-Auth: Sentry sentry_version=7, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"user123","dsn":"https://123456@warden.example.com/42","sent_at":"2025-06-07T12:00:00Z"}
+          {"type":"event","length":286}
+          {"event_id":"user123","timestamp":"2025-06-07T11:59:59Z","platform":"javascript","level":"error","environment":"production","message":"Error with user context","user":{"id":"user_12345","email":"user@example.com","username":"testuser","ip_address":"192.0.2.1","subscription":"premium"}}
+      response:
+        status: 200
+        body: "OK"
+      dbChecks:
+        - query: SELECT COUNT(*) AS count FROM issues WHERE title = 'Error with user context'
+          result: |
+            [{"count": 1}]
+        - query: SELECT level::TEXT, platform, source::TEXT, status::TEXT FROM issues WHERE title = 'Error with user context'
+          result: |
+            [{"level": "error", "platform": "javascript", "source": "event", "status": "unresolved"}]

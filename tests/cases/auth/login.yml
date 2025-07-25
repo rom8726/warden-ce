@@ -1,0 +1,273 @@
+- name: success login with valid credentials
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: login_success
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        json: |
+          {
+            "access_token": "<<PRESENCE>>",
+            "refresh_token": "<<PRESENCE>>",
+            "expires_in": "<<PRESENCE>>",
+            "is_tmp_password": false
+          }
+      dbChecks:
+        - query: SELECT (now() - last_login < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: true
+        - query: SELECT (now() - updated_at < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: true
+
+- name: login with invalid username
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: login_invalid_username
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"nonexistent", "password":"WardenQwe321!"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "authentication failed: invalid credentials"
+            }
+          }
+      dbChecks:
+        - query: SELECT (now() - last_login < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+        - query: SELECT (now() - updated_at < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+
+- name: login with invalid password
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: login_invalid_password
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"wrongpassword"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "authentication failed: invalid credentials"
+            }
+          }
+      dbChecks:
+        - query: SELECT (now() - last_login < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+        - query: SELECT (now() - updated_at < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+
+- name: login with empty username
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: login_empty_username
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"", "password":"WardenQwe321!"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "authentication failed: invalid credentials"
+            }
+          }
+      dbChecks:
+        - query: SELECT (now() - last_login < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+        - query: SELECT (now() - updated_at < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+
+- name: login with empty password
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: login_empty_password
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":""}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "authentication failed: invalid credentials"
+            }
+          }
+      dbChecks:
+        - query: SELECT (now() - last_login < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+        - query: SELECT (now() - updated_at < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+
+- name: login with missing username
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: login_missing_username
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"password":"WardenQwe321!"}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT (now() - last_login < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+        - query: SELECT (now() - updated_at < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+
+- name: login with missing password
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: login_missing_password
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin"}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT (now() - last_login < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+        - query: SELECT (now() - updated_at < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+
+- name: login with invalid JSON
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: login_invalid_json
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: '{"username":"admin", "password":"WardenQwe321!"'
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT (now() - last_login < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+        - query: SELECT (now() - updated_at < interval '5 seconds') as res FROM public.users WHERE username = 'admin'
+          result:
+            - res: false
+
+- name: login with inactive user
+  fixtures:
+    - empty_db
+    - inactive_user
+
+  steps:
+    - name: login_inactive_user
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"inactive", "password":"WardenQwe321!"}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "authentication failed: inactive user"
+            }
+          }
+      dbChecks:
+        - query: SELECT (now() - last_login < interval '5 seconds') as res FROM public.users WHERE username = 'inactive'
+          result:
+            - res: false
+        - query: SELECT (now() - updated_at < interval '5 seconds') as res FROM public.users WHERE username = 'inactive'
+          result:
+            - res: false
+
+- name: login with regular user
+  fixtures:
+    - empty_db
+    - regular_user
+
+  steps:
+    - name: login_regular_user
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"user", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        json: |
+          {
+            "access_token": "<<PRESENCE>>",
+            "refresh_token": "<<PRESENCE>>",
+            "expires_in": "<<PRESENCE>>",
+            "is_tmp_password": false
+          }
+      dbChecks:
+        - query: SELECT (now() - last_login < interval '5 seconds') as res FROM public.users WHERE username = 'user'
+          result:
+            - res: true
+        - query: SELECT (now() - updated_at < interval '5 seconds') as res FROM public.users WHERE username = 'user'
+          result:
+            - res: true

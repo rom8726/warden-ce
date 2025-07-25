@@ -1,0 +1,163 @@
+public.teams:
+  - id: 1
+    name: developers
+    created_at: $eval(SELECT NOW())
+public.users:
+  - id: 1
+    username: admin
+    email: admin@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: true
+    is_active: true
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+    last_login: $eval(SELECT NOW())
+    is_tmp_password: false
+    two_fa_enabled: false
+  - id: 2
+    username: dev2
+    email: dev2@warden.io
+    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    is_superuser: false
+    is_active: true
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+    last_login: $eval(SELECT NOW())
+    is_tmp_password: false
+    two_fa_enabled: false
+public.team_members:
+  - team_id: 1
+    user_id: 1
+    role: owner
+  - team_id: 1
+    user_id: 2
+    role: admin
+public.projects:
+  - id: 1
+    name: AnalyticsProject
+    description: Project for analytics testing
+    public_key: 418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+    created_at: $eval(SELECT NOW())
+    team_id: 1
+public.releases:
+  - id: 1
+    project_id: 1
+    version: "1.0.0"
+    description: "Initial release"
+    released_at: $eval(SELECT NOW() - INTERVAL '7 days')
+    created_at: $eval(SELECT NOW() - INTERVAL '7 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '7 days')
+  - id: 2
+    project_id: 1
+    version: "1.1.0"
+    description: "Bug fixes and improvements"
+    released_at: $eval(SELECT NOW() - INTERVAL '3 days')
+    created_at: $eval(SELECT NOW() - INTERVAL '3 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '3 days')
+  - id: 3
+    project_id: 1
+    version: "1.2.0"
+    description: "New features"
+    released_at: $eval(SELECT NOW())
+    created_at: $eval(SELECT NOW())
+    updated_at: $eval(SELECT NOW())
+public.issues:
+  - id: 1
+    project_id: 1
+    fingerprint: 54d8a9e1ba944f508464b4c0f6dd3320
+    source: event
+    status: unresolved
+    title: "Critical bug in login"
+    level: fatal
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '10 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '10 days')
+    total_events: 1
+    created_at: $eval(SELECT NOW() - INTERVAL '10 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '10 days')
+  - id: 2
+    project_id: 1
+    fingerprint: 64d8a9e1ba944f508464b4c0f6dd3321
+    source: exception
+    status: unresolved
+    title: "UI glitch in dashboard"
+    level: exception
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '8 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '8 days')
+    total_events: 2
+    created_at: $eval(SELECT NOW() - INTERVAL '8 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '8 days')
+  - id: 3
+    project_id: 1
+    fingerprint: 74d8a9e1ba944f508464b4c0f6dd3322
+    source: event
+    status: resolved
+    title: "Performance issue"
+    level: warning
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '6 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '2 days')
+    total_events: 5
+    created_at: $eval(SELECT NOW() - INTERVAL '6 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '2 days')
+  - id: 4
+    project_id: 1
+    fingerprint: 84d8a9e1ba944f508464b4c0f6dd3323
+    source: event
+    status: resolved
+    title: "Minor UI issue"
+    level: info
+    platform: javascript
+    first_seen: $eval(SELECT NOW() - INTERVAL '5 days')
+    last_seen: $eval(SELECT NOW() - INTERVAL '1 day')
+    total_events: 3
+    created_at: $eval(SELECT NOW() - INTERVAL '5 days')
+    updated_at: $eval(SELECT NOW() - INTERVAL '1 day')
+public.issue_releases:
+  - issue_id: 1
+    release_id: 1
+    first_seen_in: true
+  - issue_id: 2
+    release_id: 1
+    first_seen_in: true
+  - issue_id: 3
+    release_id: 2
+    first_seen_in: true
+  - issue_id: 4
+    release_id: 2
+    first_seen_in: true
+public.release_stats:
+  - release_id: 1
+    project_id: 1
+    release: "1.0.0"
+    generated_at: $eval(SELECT NOW())
+    known_issues_total: 2
+    new_issues_total: 2
+    regressions_total: 0
+    resolved_in_version_total: 0
+    fixed_new_in_version_total: 0
+    fixed_old_in_version_total: 0
+    users_affected: 15
+  - release_id: 2
+    project_id: 1
+    release: "1.1.0"
+    generated_at: $eval(SELECT NOW())
+    known_issues_total: 2
+    new_issues_total: 2
+    regressions_total: 0
+    resolved_in_version_total: 2
+    fixed_new_in_version_total: 2
+    fixed_old_in_version_total: 0
+    users_affected: 8
+  - release_id: 3
+    project_id: 1
+    release: "1.2.0"
+    generated_at: $eval(SELECT NOW())
+    known_issues_total: 0
+    new_issues_total: 0
+    regressions_total: 0
+    resolved_in_version_total: 0
+    fixed_new_in_version_total: 0
+    fixed_old_in_version_total: 0
+    users_affected: 0 

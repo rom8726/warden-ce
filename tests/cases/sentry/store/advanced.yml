@@ -1,0 +1,137 @@
+- name: store event with different error levels
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: send_fatal_error
+      request:
+        method: POST
+        path: /api/1/store/
+        headers:
+          Content-Type: application/json
+          Content-Length: 235
+          X-Sentry-Auth: Sentry sentry_version=6, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"fatal123","timestamp":"2025-06-07T11:59:59Z","platform":"javascript","level":"fatal","environment":"production","message":"Fatal error occurred","exception":{"values":[{"type":"FatalError","value":"Application crashed"}]}}
+      response:
+        status: 200
+        json: |
+          {
+            "id": "fatal123"
+          }
+      dbChecks:
+        - query: SELECT level::TEXT, title, source::TEXT, status::TEXT FROM issues WHERE title = 'Fatal error occurred'
+          result: |
+            [{"level": "exception", "title": "Fatal error occurred", "source": "exception", "status": "unresolved"}]
+
+    - name: send_warning
+      request:
+        method: POST
+        path: /api/1/store/
+        headers:
+          Content-Type: application/json
+          Content-Length: 157
+          X-Sentry-Auth: Sentry sentry_version=6, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"warning123","timestamp":"2025-06-07T11:59:59Z","platform":"javascript","level":"warning","environment":"production","message":"Warning message"}
+      response:
+        status: 200
+        json: |
+          {
+            "id": "warning123"
+          }
+      dbChecks:
+        - query: SELECT level::TEXT, title, source::TEXT, status::TEXT FROM issues WHERE title = 'Warning message'
+          result: |
+            [{"level": "warning", "title": "Warning message", "source": "event", "status": "unresolved"}]
+
+    - name: send_info
+      request:
+        method: POST
+        path: /api/1/store/
+        headers:
+          Content-Type: application/json
+          Content-Length: 151
+          X-Sentry-Auth: Sentry sentry_version=6, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"info123","timestamp":"2025-06-07T11:59:59Z","platform":"javascript","level":"info","environment":"production","message":"Informational message"}
+      response:
+        status: 200
+        json: |
+          {
+            "id": "info123"
+          }
+      dbChecks:
+        - query: SELECT level::TEXT, title, source::TEXT, status::TEXT FROM issues WHERE title = 'Informational message'
+          result: |
+            [{"level": "info", "title": "Informational message", "source": "event", "status": "unresolved"}]
+
+- name: store event with various attributes
+  fixtures:
+    - empty_db
+    - project_without_team
+
+  steps:
+    - name: send_event_with_tags
+      request:
+        method: POST
+        path: /api/1/store/
+        headers:
+          Content-Type: application/json
+          Content-Length: 300
+          X-Sentry-Auth: Sentry sentry_version=6, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"tags123","timestamp":"2025-06-07T11:59:59Z","platform":"javascript","level":"error","environment":"production","message":"Event with tags","tags":{"browser":"Chrome","version":"125.0.6422.112","os":"Windows","os.version":"11"}}
+      response:
+        status: 200
+        json: |
+          {
+            "id": "tags123"
+          }
+      dbChecks:
+        - query: SELECT level::TEXT, title, source::TEXT, status::TEXT FROM issues WHERE title = 'Event with tags'
+          result: |
+            [{"level": "error", "title": "Event with tags", "source": "event", "status": "unresolved"}]
+
+    - name: send_event_with_request_data
+      request:
+        method: POST
+        path: /api/1/store/
+        headers:
+          Content-Type: application/json
+          Content-Length: 400
+          X-Sentry-Auth: Sentry sentry_version=6, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"request123","timestamp":"2025-06-07T11:59:59Z","platform":"javascript","level":"error","environment":"production","message":"Event with request data","request":{"url":"https://example.com/checkout","method":"POST","headers":{"User-Agent":"Mozilla/5.0","Referer":"https://example.com/cart"},"data":{"product_id":123,"quantity":2}}}
+      response:
+        status: 200
+        json: |
+          {
+            "id": "request123"
+          }
+      dbChecks:
+        - query: SELECT level::TEXT, title, source::TEXT, status::TEXT FROM issues WHERE title = 'Event with request data'
+          result: |
+            [{"level": "error", "title": "Event with request data", "source": "event", "status": "unresolved"}]
+
+    - name: send_event_with_stacktrace
+      request:
+        method: POST
+        path: /api/1/store/
+        headers:
+          Content-Type: application/json
+          Content-Length: 500
+          X-Sentry-Auth: Sentry sentry_version=6, sentry_client=sentry.go/0.33.0, sentry_key=418aba92087742d7ac5a252ebee0d7299f1f1ca96fdfa781843a990bf7b93cc1
+        bodyRaw: |
+          {"event_id":"stacktrace123","timestamp":"2025-06-07T11:59:59Z","platform":"javascript","level":"error","environment":"production","message":"Event with stacktrace","exception":{"values":[{"type":"TypeError","value":"Cannot read property 'foo' of undefined","stacktrace":{"frames":[{"filename":"app.js","function":"processData","lineno":42,"colno":13,"in_app":true},{"filename":"utils.js","function":"parseResponse","lineno":28,"colno":5,"in_app":true}]}}]}}
+      response:
+        status: 200
+        json: |
+          {
+            "id": "stacktrace123"
+          }
+      dbChecks:
+        - query: SELECT level::TEXT, title, source::TEXT, status::TEXT FROM issues WHERE title = 'Event with stacktrace'
+          result: |
+            [{"level": "exception", "title": "Event with stacktrace", "source": "exception", "status": "unresolved"}]

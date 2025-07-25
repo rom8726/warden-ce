@@ -1,0 +1,45 @@
+filename: 'mock_{{.InterfaceName | snakecase }}.go'
+with-expecter: True
+dir: test_mocks/{{ replaceAll .InterfaceDirRelative "internal" "internal_" }}
+mockname: 'Mock{{.InterfaceName}}'
+outpkg: 'mock{{.PackageName}}'
+packages:
+  github.com/rom8726/warden/internal/contract:
+    config:
+      all: True
+  github.com/rom8726/warden/internal/ingest-server/contract:
+    config:
+      all: True
+  github.com/rom8726/warden/internal/envelope-consumer/contract:
+    config:
+      all: True
+  github.com/rom8726/warden/internal/issue-notificator/contract:
+    config:
+      all: True
+  github.com/rom8726/warden/internal/scheduler/contract:
+    config:
+      all: True
+  github.com/rom8726/warden/internal/backend/contract:
+    config:
+      all: True
+  github.com/rom8726/warden/internal/issue-notificator/notificator:
+    config:
+      all: True
+  github.com/rom8726/warden/internal/backend/usecases/users:
+    config:
+      all: True
+  github.com/rom8726/warden/internal/backend/services/ldap:
+    config:
+      all: False
+    interfaces:
+      ClientService:
+        config:
+  github.com/rom8726/warden/internal/services/notification-channels/email:
+    config:
+      all: True
+  github.com/rom8726/warden/pkg/db:
+    config:
+      all: True
+  github.com/rom8726/warden/pkg/kafka:
+    config:
+      all: True

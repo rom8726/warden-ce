@@ -1,0 +1,271 @@
+- name: success project create without team
+  fixtures:
+    - empty_db
+    - admin_user
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_project
+      request:
+        method: POST
+        path: /api/v1/projects/add
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":"No Team Project", "description":"some project", "team_id": null}
+      response:
+        status: 201
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM projects
+          result:
+            - cnt: 1
+        - query: SELECT name, description, length(public_key) AS pub_key_len FROM projects ORDER BY id
+          result:
+            - name: "No Team Project"
+              description: "some project"
+              pub_key_len: 64
+
+- name: success project create with team
+  fixtures:
+    - empty_db
+    - developers_team_with_members
+
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_project
+      request:
+        method: POST
+        path: /api/v1/projects/add
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":"Project With Team", "description":"some project", team_id": 1}
+      response:
+        status: 201
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM projects
+          result:
+            - cnt: 1
+        - query: SELECT name, description, length(public_key) AS pub_key_len FROM projects ORDER BY id
+          result:
+            - name: "Project With Team"
+              description: "some project"
+              pub_key_len: 64
+
+- name: create project with bad request
+  fixtures:
+    - empty_db
+    - admin_user
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_project
+      request:
+        method: POST
+        path: /api/v1/projects/add
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":null, "team_id": null}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM projects
+          result:
+            - cnt: 0
+        - query: SELECT name FROM projects WHERE name IS NULL
+          result: []
+
+- name: create project without auth
+  fixtures:
+    - empty_db
+    - admin_user
+  steps:
+    - name: add_project_unauthorized
+      request:
+        method: POST
+        path: /api/v1/projects/add
+        headers:
+          Content-Type: application/json
+        body: {"name":"Test Project", "description":"some project", "team_id": null}
+      response:
+        status: 401
+        json: |
+          {
+            "error": {
+              "message": "unauthorized"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM projects
+          result:
+            - cnt: 0
+        - query: SELECT name FROM projects WHERE name = 'Test Project'
+          result: []
+
+- name: create project with non-existent team
+  fixtures:
+    - empty_db
+    - admin_user
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_project
+      request:
+        method: POST
+        path: /api/v1/projects/add
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":"Test Project", "description":"some project", "team_id": 999}
+      response:
+        status: 404
+        json: |
+          {
+            "error": {
+              "message": "get team: entity not found"
+            }
+          }
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM projects
+          result:
+            - cnt: 0
+        - query: SELECT name FROM projects WHERE name = 'Test Project'
+          result: []
+
+- name: create project with empty name
+  fixtures:
+    - empty_db
+    - admin_user
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_project
+      request:
+        method: POST
+        path: /api/v1/projects/add
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":"", "team_id": null}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM projects
+          result:
+            - cnt: 0
+        - query: SELECT name FROM projects WHERE name = ''
+          result: []
+
+- name: create project with short name
+  fixtures:
+    - empty_db
+    - admin_user
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_project
+      request:
+        method: POST
+        path: /api/v1/projects/add
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: {"name":"A", "description":"some project", "team_id": null}
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM projects
+          result:
+            - cnt: 0
+        - query: SELECT name FROM projects WHERE name = 'A'
+          result: []
+
+- name: create project with invalid JSON
+  fixtures:
+    - empty_db
+    - admin_user
+  steps:
+    - name: auth
+      request:
+        method: POST
+        path: /api/v1/auth/login
+        headers:
+          Content-Type: application/json
+        body: {"username":"admin", "password":"WardenQwe321!"}
+      response:
+        status: 200
+        headers:
+          Content-Type: application/json
+    - name: add_project
+      request:
+        method: POST
+        path: /api/v1/projects/add
+        headers:
+          Content-Type: application/json
+          Authorization: 'Bearer {{auth.response.access_token}}'
+        body: '{"name":"Test Project", "team_id": "invalid"}'
+      response:
+        status: 400
+      dbChecks:
+        - query: SELECT COUNT(*) AS cnt FROM projects
+          result:
+            - cnt: 0
+        - query: SELECT name FROM projects WHERE name = 'Test Project'
+          result: []

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px;
+            background-color: #1c1e23;
+            color: #f5f5fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 24px auto;
+            padding: 24px;
+            background: linear-gradient(to bottom, #2d3038, #23262e);
+            border: 1px solid #3a3d4a;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        .header {
+            padding-bottom: 16px;
+            border-bottom: 1px solid #3a3d4a;
+        }
+        .title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #f5f5fa;
+        }
+        .content {
+            padding: 24px 0;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+        .code {
+            display: inline-block;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: #8252ff;
+            background: #23262e;
+            border-radius: 8px;
+            padding: 12px 32px;
+            margin: 18px 0;
+            border: 1px solid #3a3d4a;
+        }
+        .footer {
+            margin-top: 24px;
+            font-size: 13px;
+            color: #8892a0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="title">Warden 2FA Confirmation</div>
+    </div>
+    <div class="content">
+        <p>Hello,</p>
+        <p>Your 2FA confirmation code {{ .ActionText }}:</p>
+        <div class="code">{{ .Code }}</div>
+        <p>This code is valid for 10 minutes.</p>
+    </div>
+    <div class="footer">
+        If you did not request this, please ignore this email.<br />— The Warden Team
+    </div>
+</div>
+</body>
+</html> 

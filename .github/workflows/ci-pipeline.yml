@@ -1,0 +1,520 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      build_frontend:
+        description: 'Build frontend image'
+        required: false
+        default: true
+        type: boolean
+      build_reverse_proxy:
+        description: 'Build reverse-proxy image'
+        required: false
+        default: true
+        type: boolean
+      build_backend:
+        description: 'Build backend image'
+        required: false
+        default: true
+        type: boolean
+      build_envelope_consumer:
+        description: 'Build envelope consumer image'
+        required: false
+        default: true
+        type: boolean
+      build_ingest_server:
+        description: 'Build ingest server image'
+        required: false
+        default: true
+        type: boolean
+      build_issue_notificator:
+        description: 'Build issue notificator image'
+        required: false
+        default: true
+        type: boolean
+      build_user_notificator:
+        description: 'Build user notificator image'
+        required: false
+        default: true
+        type: boolean
+      build_scheduler:
+        description: 'Build scheduler image'
+        required: false
+        default: true
+        type: boolean
+      build_pgbouncer:
+        description: 'Build pgbouncer image'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  REGISTRY: ${{ vars.DOCKER_REGISTRY || 'chudov.cr.cloud.ru' }}
+  FRONTEND_IMAGE: warden-frontend
+  REVERSE_PROXY_IMAGE: warden-reverse-proxy
+  BACKEND_IMAGE: warden-backend
+  ENVELOPE_CONSUMER_IMAGE: warden-envelope-consumer
+  INGEST_IMAGE: warden-ingest-server
+  ISSUE_NOTIFICATOR_IMAGE: warden-issue-notificator
+  USER_NOTIFICATOR_IMAGE: warden-user-notificator
+  SCHEDULER_IMAGE: warden-scheduler
+  PGBOUNCER_IMAGE: warden-pgbouncer
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Install golangci-lint
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.64.8
+
+      - name: Run golangci-lint
+        run: |
+          $(go env GOPATH)/bin/golangci-lint run ./... --config=./.golangci.yml
+
+  test:
+    name: Test
+    runs-on: ubuntu-22.04
+    needs: lint
+    outputs:
+      coverage: ${{ steps.coverage.outputs.coverage }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+          cache: true
+
+      - name: Run tests
+        run: make test
+
+      - name: Calculate coverage
+        id: coverage
+        run: |
+          COVERAGE=$(go tool cover -func=coverage.out | grep total | grep -Eo '[0-9]+\.[0-9]+')
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+          echo "Total coverage: $COVERAGE%"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.html
+
+      - name: Create coverage badge
+        id: coverage_badge
+        uses: schneegans/dynamic-badges-action@v1.6.0
+        if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
+        continue-on-error: true
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: warden-coverage.json
+          label: coverage
+          message: ${{ steps.coverage.outputs.coverage }}%
+          color: ${{ steps.coverage.outputs.coverage >= 80 && 'green' || steps.coverage.outputs.coverage >= 70 && 'yellow' || 'red' }}
+          namedLogo: go
+
+      - name: Check coverage badge status
+        if: ${{ steps.coverage_badge.outcome == 'failure' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master') }}
+        run: |
+          echo "::warning::Failed to update coverage badge. Please check your GIST_SECRET and GIST_ID secrets, and make sure the Gist exists and is accessible."
+
+  build-backend:
+    name: Build backend
+    runs-on: ubuntu-22.04
+    needs: test
+    if: ${{ github.event.inputs.build_backend != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get version info
+        id: version-backend
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git rev-parse --short HEAD)
+          fi
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Build time: $BUILD_TIME"
+
+
+
+      - name: Build and push backend image
+        run: |
+          TOOL_VERSION=${{ steps.version-backend.outputs.version }} \
+          TOOL_BUILD_TIME=${{ steps.version-backend.outputs.build_time }} \
+          DOCKER_REGISTRY=${{ env.REGISTRY }} \
+          make docker-push-backend
+
+#      - name: Test backend security
+#        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+#        run: |
+#          docker build -f Dockerfile.backend -t warden-backend:test .
+#          chmod +x scripts/test-security.sh
+#          ./scripts/test-security.sh warden-backend:test /bin/app --check-curl
+
+  build-envelope-consumer:
+    name: Build envelope consumer
+    runs-on: ubuntu-22.04
+    needs: test
+    if: ${{ github.event.inputs.build_envelope_consumer != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get version info
+        id: version-envelope-consumer
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git rev-parse --short HEAD)
+          fi
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Build time: $BUILD_TIME"
+
+      - name: Build and push envelope consumer image
+        run: |
+          TOOL_VERSION=${{ steps.version-envelope-consumer.outputs.version }} \
+          TOOL_BUILD_TIME=${{ steps.version-envelope-consumer.outputs.build_time }} \
+          DOCKER_REGISTRY=${{ env.REGISTRY }} \
+          make docker-push-envelope-consumer
+
+  build-ingest-server:
+    name: Build ingest server
+    runs-on: ubuntu-22.04
+    needs: test
+    if: ${{ github.event.inputs.build_ingest_server != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get version info
+        id: version-ingest-server
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git rev-parse --short HEAD)
+          fi
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Build time: $BUILD_TIME"
+
+      - name: Build and push ingest server image
+        run: |
+          TOOL_VERSION=${{ steps.version-ingest-server.outputs.version }} \
+          TOOL_BUILD_TIME=${{ steps.version-ingest-server.outputs.build_time }} \
+          DOCKER_REGISTRY=${{ env.REGISTRY }} \
+          make docker-push-ingest-server
+
+  build-issue-notificator:
+    name: Build issue notificator
+    runs-on: ubuntu-22.04
+    needs: test
+    if: ${{ github.event.inputs.build_issue_notificator != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get version info
+        id: version-issue-notificator
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git rev-parse --short HEAD)
+          fi
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Build time: $BUILD_TIME"
+
+      - name: Build and push issue notificator image
+        run: |
+          TOOL_VERSION=${{ steps.version-issue-notificator.outputs.version }} \
+          TOOL_BUILD_TIME=${{ steps.version-issue-notificator.outputs.build_time }} \
+          DOCKER_REGISTRY=${{ env.REGISTRY }} \
+          make docker-push-issue-notificator
+
+  build-user-notificator:
+    name: Build user notificator
+    runs-on: ubuntu-22.04
+    needs: test
+    if: ${{ github.event.inputs.build_user_notificator != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get version info
+        id: version-user-notificator
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git rev-parse --short HEAD)
+          fi
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Build time: $BUILD_TIME"
+
+      - name: Build and push user notificator image
+        run: |
+          TOOL_VERSION=${{ steps.version-user-notificator.outputs.version }} \
+          TOOL_BUILD_TIME=${{ steps.version-user-notificator.outputs.build_time }} \
+          DOCKER_REGISTRY=${{ env.REGISTRY }} \
+          make docker-push-user-notificator
+
+  build-scheduler:
+    name: Build scheduler
+    runs-on: ubuntu-22.04
+    needs: test
+    if: ${{ github.event.inputs.build_scheduler != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get version info
+        id: version-scheduler
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git rev-parse --short HEAD)
+          fi
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Build time: $BUILD_TIME"
+
+      - name: Build and push scheduler image
+        run: |
+          TOOL_VERSION=${{ steps.version-scheduler.outputs.version }} \
+          TOOL_BUILD_TIME=${{ steps.version-scheduler.outputs.build_time }} \
+          DOCKER_REGISTRY=${{ env.REGISTRY }} \
+          make docker-push-scheduler
+
+  build-pgbouncer:
+    name: Build PgBouncer
+    runs-on: ubuntu-22.04
+    needs: test
+    if: ${{ github.event.inputs.build_pgbouncer != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get version info
+        id: version-pgbouncer
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git rev-parse --short HEAD)
+          fi
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Build time: $BUILD_TIME"
+
+      - name: Build and push pgbouncer image
+        run: |
+          TOOL_VERSION=${{ steps.version-pgbouncer.outputs.version }} \
+          TOOL_BUILD_TIME=${{ steps.version-pgbouncer.outputs.build_time }} \
+          DOCKER_REGISTRY=${{ env.REGISTRY }} \
+          make docker-push-pgbouncer
+
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-22.04
+    needs: test
+    if: ${{ github.event.inputs.build_frontend != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get version info
+        id: version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git rev-parse --short HEAD)
+          fi
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Build time: $BUILD_TIME"
+
+      - name: Build and push frontend image
+        run: |
+          cd ui && \
+          VITE_VERSION=${{ steps.version.outputs.version }} \
+          VITE_BUILD_TIME=${{ steps.version.outputs.build_time }} \
+          DOCKER_REGISTRY=${{ env.REGISTRY }} \
+          make docker-push
+
+  build-reverse-proxy:
+    name: Build Reverse Proxy
+    runs-on: ubuntu-22.04
+    needs: test
+    if: ${{ github.event.inputs.build_reverse_proxy != 'false' && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/'))) }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Get version info
+        id: version-reverse-proxy
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=$(git rev-parse --short HEAD)
+          fi
+          BUILD_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_time=$BUILD_TIME" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+          echo "Build time: $BUILD_TIME"
+
+      - name: Build and push reverse-proxy image
+        run: |
+          TOOL_VERSION=${{ steps.version-reverse-proxy.outputs.version }} \
+          TOOL_BUILD_TIME=${{ steps.version-reverse-proxy.outputs.build_time }} \
+          DOCKER_REGISTRY=${{ env.REGISTRY }} \
+          make docker-push-reverse-proxy
+
+  cleanup:
+    name: Cleanup
+    needs: [build-backend, build-envelope-consumer, build-ingest-server, build-issue-notificator, build-user-notificator, build-scheduler, build-pgbouncer, build-frontend, build-reverse-proxy]
+    runs-on: ubuntu-22.04
+    if: always() && (github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')))
+    steps:
+      - name: Cleanup Docker
+        run: |
+          docker system prune -f
