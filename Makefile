@@ -16,7 +16,7 @@ OS=$(shell uname -s)
 IGNORE_TEST_DIRS=cmd,ui,test_mocks,specs,scripts,migrations,docs,dev,internal/generated,tests/runner,internal/contract,pkg/metrics
 
 # Docker registry configuration
-DOCKER_REGISTRY ?= chudov.cr.cloud.ru
+DOCKER_REGISTRY ?= docker.com
 
 LD_FLAGS="-w -s -X 'github.com/rom8726/warden/internal/version.Version=${TOOL_VERSION}' -X 'github.com/rom8726/warden/internal/version.BuildTime=${TOOL_BUILD_TIME}' -X 'github.com/rom8726/warden/internal/installer.DockerRegistry=${DOCKER_REGISTRY}'"
 
