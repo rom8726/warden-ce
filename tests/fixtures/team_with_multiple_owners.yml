@@ -2,7 +2,7 @@ public.users:
   - id: 1
     username: admin
     email: admin@warden.io
-    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    password_hash: $2a$10$ltJ8vHGUASZaig9fpaoAOezjHIjzBbl/I4wJDvJS0MAfF6ZVhqnv6
     is_superuser: true
     is_active: true
     is_tmp_password: false
@@ -12,7 +12,7 @@ public.users:
   - id: 2
     username: user1
     email: user1@warden.io
-    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    password_hash: $2a$10$ltJ8vHGUASZaig9fpaoAOezjHIjzBbl/I4wJDvJS0MAfF6ZVhqnv6
     is_superuser: false
     is_active: true
     is_tmp_password: false
@@ -22,7 +22,7 @@ public.users:
   - id: 3
     username: user2
     email: user2@warden.io
-    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    password_hash: $2a$10$ltJ8vHGUASZaig9fpaoAOezjHIjzBbl/I4wJDvJS0MAfF6ZVhqnv6
     is_superuser: false
     is_active: true
     is_tmp_password: false
@@ -32,7 +32,7 @@ public.users:
   - id: 4
     username: user3
     email: user3@warden.io
-    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    password_hash: $2a$10$ltJ8vHGUASZaig9fpaoAOezjHIjzBbl/I4wJDvJS0MAfF6ZVhqnv6
     is_superuser: false
     is_active: true
     is_tmp_password: false

@@ -2,7 +2,7 @@ public.users:
   - id: 1
     username: admin
     email: admin@warden.io
-    password_hash: $2a$10$wFiI/2DOOS6gpfEjFHc.Cu6ycBYgArF4enzHK7jLh/PyU218rzCy.
+    password_hash: $2a$10$ltJ8vHGUASZaig9fpaoAOezjHIjzBbl/I4wJDvJS0MAfF6ZVhqnv6
     is_superuser: true
     is_active: true
     created_at: $eval(SELECT NOW())

@@ -105,7 +105,7 @@ jobs:
           cache: true
 
       - name: Run tests
-        run: make test
+        run: make test.integration
 
       - name: Calculate coverage
         id: coverage
