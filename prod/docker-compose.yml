@@ -1,0 +1,359 @@
+version: '3.8'
+
+services:
+  warden-reverse-proxy:
+    image: ${DOCKER_REGISTRY}/rom8726/warden-reverse-proxy:${PLATFORM_VERSION}
+    container_name: warden-reverse-proxy
+    ports:
+      - "443:443"
+      - "8090:8090" # ingest-server HTTP
+    environment:
+      - DOMAIN=${DOMAIN}
+      - BACKEND_URL=http://warden-backend:8080
+      - FRONTEND_URL=http://warden-frontend
+      - INGEST_SERVER_URL=http://warden-ingest-server:8080
+      - SSL_CERT=${SSL_CERT}
+      - SSL_CERT_KEY=${SSL_CERT_KEY}
+      - SECURE_LINK_MD5=${SECURE_LINK_MD5}
+    volumes:
+      - "/opt/warden/nginx/ssl:/etc/nginx/ssl"
+    depends_on:
+      warden-backend:
+        condition: service_healthy
+      warden-frontend:
+        condition: service_healthy
+      warden-ingest-server:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "netstat", "-tln", "|", "grep", "443 && netstat", "-tln", "|", "grep", "8090"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  warden-frontend:
+    image: ${DOCKER_REGISTRY}/rom8726/warden-frontend:${PLATFORM_VERSION}
+    container_name: warden-frontend
+    environment:
+      - WARDEN_API_BASE_URL=https://${DOMAIN}
+      - WARDEN_VERSION=${PLATFORM_VERSION}
+    restart: always
+    depends_on:
+      warden-backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  warden-backend:
+    image: ${DOCKER_REGISTRY}/rom8726/warden-backend:${PLATFORM_VERSION}
+    container_name: warden-backend
+    env_file:
+      - config.env
+    command: ["/bin/app", "server"]
+    depends_on:
+      warden-postgresql:
+        condition: service_healthy
+      warden-pgbouncer:
+        condition: service_healthy
+      warden-redis:
+        condition: service_healthy
+      warden-clickhouse:
+        condition: service_healthy
+      warden-kafka:
+        condition: service_healthy
+    volumes:
+      - "/opt/warden/secrets:/opt/warden/secrets"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  warden-envelope-consumer:
+    image: ${DOCKER_REGISTRY}/rom8726/warden-envelope-consumer:${PLATFORM_VERSION}
+    container_name: warden-envelope-consumer
+    env_file:
+      - config.env
+    command: ["/bin/app", "consumer"]
+    depends_on:
+      warden-postgresql:
+        condition: service_healthy
+      warden-pgbouncer:
+        condition: service_healthy
+      warden-clickhouse:
+        condition: service_healthy
+      warden-kafka:
+        condition: service_healthy
+      warden-ingest-server:
+        condition: service_healthy
+      warden-backend:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  warden-ingest-server:
+    image: ${DOCKER_REGISTRY}/rom8726/warden-ingest-server:${PLATFORM_VERSION}
+    container_name: warden-ingest-server
+    env_file:
+      - config.env
+    command: ["/bin/app", "server"]
+    depends_on:
+      warden-postgresql:
+        condition: service_healthy
+      warden-pgbouncer:
+        condition: service_healthy
+      warden-kafka:
+        condition: service_healthy
+      warden-backend:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  warden-issue-notificator:
+    image: ${DOCKER_REGISTRY}/rom8726/warden-issue-notificator:${PLATFORM_VERSION}
+    container_name: warden-issue-notificator
+    env_file:
+      - config.env
+    command: ["/bin/app", "notificator"]
+    depends_on:
+      warden-postgresql:
+        condition: service_healthy
+      warden-pgbouncer:
+        condition: service_healthy
+      warden-backend:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  warden-user-notificator:
+    image: ${DOCKER_REGISTRY}/rom8726/warden-user-notificator:${PLATFORM_VERSION}
+    container_name: warden-user-notificator
+    env_file:
+      - config.env
+    command: ["/bin/app", "notificator"]
+    depends_on:
+      warden-postgresql:
+        condition: service_healthy
+      warden-pgbouncer:
+        condition: service_healthy
+      warden-backend:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  warden-scheduler:
+    image: ${DOCKER_REGISTRY}/rom8726/warden-scheduler:${PLATFORM_VERSION}
+    container_name: warden-scheduler
+    env_file:
+      - config.env
+    command: ["/bin/app", "run"]
+    depends_on:
+      warden-postgresql:
+        condition: service_healthy
+      warden-pgbouncer:
+        condition: service_healthy
+      warden-clickhouse:
+        condition: service_healthy
+      warden-backend:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  warden-postgresql:
+    image: postgres:16
+    container_name: warden-postgresql
+    restart: always
+    environment:
+      POSTGRES_USER: warden
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: warden
+      PGDATA: /var/lib/postgresql/main/data
+    volumes:
+      - "/opt/warden/postgres/data:/var/lib/postgresql/main/data"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U warden -d warden"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  warden-pgbouncer:
+    image: ${DOCKER_REGISTRY}/rom8726/warden-pgbouncer:${PLATFORM_VERSION}
+    container_name: warden-pgbouncer
+    restart: always
+    environment:
+      - DB_HOST=warden-postgresql
+      - DB_PORT=5432
+      - DB_USER=warden
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=warden
+      - LISTEN_PORT=6432
+      - MAX_CLIENT_CONN=1500
+      - DEFAULT_POOL_SIZE=30
+      - MIN_POOL_SIZE=10
+      - RESERVE_POOL_SIZE=10
+      - MAX_DB_CONNECTIONS=200
+      - MAX_USER_CONNECTIONS=200
+      - VERBOSE=0
+    depends_on:
+      warden-postgresql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "6432", "-U", "warden"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  warden-redis:
+    image: 'redis'
+    container_name: warden-redis
+    volumes:
+      - "/opt/warden/redis/data:/data"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+
+  warden-clickhouse:
+    image: clickhouse/clickhouse-server:25.6.4
+    container_name: warden-clickhouse
+    environment:
+      CLICKHOUSE_DB: warden
+      CLICKHOUSE_USER: default
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_DB_PASSWORD}
+    volumes:
+      - "/opt/warden/clickhouse/data:/var/lib/clickhouse"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8123/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  warden-zookeeper:
+    container_name: warden-zookeper
+    image: 'bitnami/zookeeper:3.9.3'
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    healthcheck:
+      test: ["CMD-SHELL", "echo srvr | nc localhost 2181 | grep -q 'Zookeeper version' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  warden-kafka:
+    container_name: warden-kafka
+    image: 'bitnami/kafka:3.9.0'
+    restart: always
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_ZOOKEEPER_CONNECT=warden-zookeeper:2181
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://warden-kafka:9092,EXTERNAL://localhost:9093
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+      - KAFKA_ENABLE_KRAFT=no
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    volumes:
+      - "/opt/warden/kafka/data:/var/lib/kafka/data"
+    depends_on:
+      warden-zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
+      interval: 20s
+      timeout: 15s
+      retries: 10
+      start_period: 120s
+
+  # Additional consumers
+
+  warden-envelope-consumer-2:
+    image: ${DOCKER_REGISTRY}/rom8726/warden-envelope-consumer:${PLATFORM_VERSION}
+    container_name: warden-envelope-consumer-2
+    env_file:
+      - config.env
+    command: ["/bin/app", "consumer"]
+    depends_on:
+      warden-postgresql:
+        condition: service_healthy
+      warden-pgbouncer:
+        condition: service_healthy
+      warden-clickhouse:
+        condition: service_healthy
+      warden-kafka:
+        condition: service_healthy
+      warden-ingest-server:
+        condition: service_healthy
+      warden-backend:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  warden-envelope-consumer-3:
+    image: ${DOCKER_REGISTRY}/rom8726/warden-envelope-consumer:${PLATFORM_VERSION}
+    container_name: warden-envelope-consumer-3
+    env_file:
+      - config.env
+    command: ["/bin/app", "consumer"]
+    depends_on:
+      warden-postgresql:
+        condition: service_healthy
+      warden-pgbouncer:
+        condition: service_healthy
+      warden-clickhouse:
+        condition: service_healthy
+      warden-kafka:
+        condition: service_healthy
+      warden-ingest-server:
+        condition: service_healthy
+      warden-backend:
+        condition: service_healthy
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
