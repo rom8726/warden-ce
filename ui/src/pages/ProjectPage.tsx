@@ -467,7 +467,7 @@ const ProjectPage: React.FC = () => {
     <Layout showBackButton={true} backTo="/dashboard">
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Box>
-          <Typography variant="h6" component="h1" gutterBottom>
+          <Typography variant="h6" component="h1" gutterBottom className="gradient-text">
             {project.name}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>

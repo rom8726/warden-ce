@@ -191,7 +191,7 @@ const ProjectSettingsPage: React.FC = () => {
   return (
     <AuthenticatedLayout showBackButton={true} backTo={`/projects/${projectId}`}>
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography variant="h4" component="h1" gutterBottom className="gradient-text-purple">
           Project Settings: {project.name}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>

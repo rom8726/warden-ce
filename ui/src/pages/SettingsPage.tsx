@@ -93,7 +93,7 @@ const SettingsPage: React.FC = () => {
 
   return (
     <AuthenticatedLayout>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom className="gradient-text">
         Settings
       </Typography>
 

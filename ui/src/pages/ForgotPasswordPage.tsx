@@ -11,8 +11,8 @@ import {
   Link
 } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
-import LogoImg from "../components/LogoImg.tsx";
 import { DefaultApi, Configuration } from '../generated/api/client';
+import WardenLogo from "../components/WardenLogo.tsx";
 
 const ForgotPasswordPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -62,10 +62,10 @@ const ForgotPasswordPage: React.FC = () => {
           }}
         >
           <Box sx={{ mb: 4 }}>
-            <LogoImg size="large" />
+            <WardenLogo logoSize={58} showLink={false} variant={"h3"} />
           </Box>
 
-          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
+          <Typography component="h1" variant="h5" sx={{ mb: 3 }} className="gradient-text">
             Forgot Password
           </Typography>
 

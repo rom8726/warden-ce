@@ -115,6 +115,7 @@ const AnalyticsPage: React.FC = () => {
         title="Analytics"
         subtitle="Analytics for project releases and events."
         icon={<AnalyticsIcon />}
+        gradientVariant="green"
       />
       <Breadcrumbs />
       

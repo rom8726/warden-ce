@@ -101,6 +101,7 @@ const DashboardPage: React.FC = () => {
         title="Dashboard"
         subtitle="Overview of your projects and issues."
         icon={<DashboardIcon />}
+        gradientVariant="default"
       />
 
       <Grid container spacing={2}>

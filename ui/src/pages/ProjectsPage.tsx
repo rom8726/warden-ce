@@ -113,6 +113,7 @@ const ProjectsPage: React.FC = () => {
         title="Projects"
         subtitle="View and manage all your projects."
         icon={<ProjectsIcon />}
+        gradientVariant="purple"
       />
 
       <Paper sx={{ p: 2, width: '100%', minWidth: '800px' }}>

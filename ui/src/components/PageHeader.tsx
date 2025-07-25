@@ -18,6 +18,7 @@ interface PageHeaderProps {
   };
   loading?: boolean;
   children?: React.ReactNode;
+  gradientVariant?: 'default' | 'purple' | 'blue' | 'green';
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ 
@@ -26,9 +27,23 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   icon, 
   badge, 
   loading = false,
-  children 
+  children,
+  gradientVariant = 'default'
 }) => {
   const theme = useTheme();
+
+  const getGradientClass = () => {
+    switch (gradientVariant) {
+      case 'purple':
+        return 'gradient-text-purple';
+      case 'blue':
+        return 'gradient-text-blue';
+      case 'green':
+        return 'gradient-text-green';
+      default:
+        return 'gradient-text';
+    }
+  };
 
   if (loading) {
     return (
@@ -74,9 +89,9 @@ const PageHeader: React.FC<PageHeaderProps> = ({
           <Typography 
             variant="h4" 
             component="h1" 
+            className={getGradientClass()}
             sx={{ 
               fontWeight: 700,
-              color: theme.palette.text.primary,
               lineHeight: 1.2,
             }}
           >
