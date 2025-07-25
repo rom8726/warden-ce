@@ -55,7 +55,7 @@ on:
         type: boolean
 
 env:
-  REGISTRY: ${{ vars.DOCKER_REGISTRY || 'docker.com' }}
+  REGISTRY: ${{ vars.DOCKER_REGISTRY || 'docker.io' }}
   FRONTEND_IMAGE: rom8726/warden-frontend
   REVERSE_PROXY_IMAGE: rom8726/warden-reverse-proxy
   BACKEND_IMAGE: rom8726/warden-backend

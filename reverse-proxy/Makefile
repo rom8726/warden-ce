@@ -1,5 +1,5 @@
 # Docker registry configuration
-DOCKER_REGISTRY ?= docker.com
+DOCKER_REGISTRY ?= docker.io
 
 RED="\033[0;31m"
 GREEN="\033[1;32m"
