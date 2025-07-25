@@ -56,15 +56,15 @@ on:
 
 env:
   REGISTRY: ${{ vars.DOCKER_REGISTRY || 'docker.com' }}
-  FRONTEND_IMAGE: warden-frontend
-  REVERSE_PROXY_IMAGE: warden-reverse-proxy
-  BACKEND_IMAGE: warden-backend
-  ENVELOPE_CONSUMER_IMAGE: warden-envelope-consumer
-  INGEST_IMAGE: warden-ingest-server
-  ISSUE_NOTIFICATOR_IMAGE: warden-issue-notificator
-  USER_NOTIFICATOR_IMAGE: warden-user-notificator
-  SCHEDULER_IMAGE: warden-scheduler
-  PGBOUNCER_IMAGE: warden-pgbouncer
+  FRONTEND_IMAGE: rom8726/warden-frontend
+  REVERSE_PROXY_IMAGE: rom8726/warden-reverse-proxy
+  BACKEND_IMAGE: rom8726/warden-backend
+  ENVELOPE_CONSUMER_IMAGE: rom8726/warden-envelope-consumer
+  INGEST_IMAGE: rom8726/warden-ingest-server
+  ISSUE_NOTIFICATOR_IMAGE: rom8726/warden-issue-notificator
+  USER_NOTIFICATOR_IMAGE: rom8726/warden-user-notificator
+  SCHEDULER_IMAGE: rom8726/warden-scheduler
+  PGBOUNCER_IMAGE: rom8726/warden-pgbouncer
 
 jobs:
   lint:

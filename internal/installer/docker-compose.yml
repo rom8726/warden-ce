@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   warden-reverse-proxy:
-    image: ${DOCKER_REGISTRY}/warden-reverse-proxy:${PLATFORM_VERSION}
+    image: ${DOCKER_REGISTRY}/rom8726/warden-reverse-proxy:${PLATFORM_VERSION}
     container_name: warden-reverse-proxy
     ports:
       - "443:443"
@@ -33,7 +33,7 @@ services:
       start_period: 40s
 
   warden-frontend:
-    image: ${DOCKER_REGISTRY}/warden-frontend:${PLATFORM_VERSION}
+    image: ${DOCKER_REGISTRY}/rom8726/warden-frontend:${PLATFORM_VERSION}
     container_name: warden-frontend
     environment:
       - WARDEN_API_BASE_URL=https://${DOMAIN}
@@ -50,7 +50,7 @@ services:
       start_period: 30s
 
   warden-backend:
-    image: ${DOCKER_REGISTRY}/warden-backend:${PLATFORM_VERSION}
+    image: ${DOCKER_REGISTRY}/rom8726/warden-backend:${PLATFORM_VERSION}
     container_name: warden-backend
     env_file:
       - config.env
@@ -76,7 +76,7 @@ services:
       start_period: 60s
 
   warden-envelope-consumer:
-    image: ${DOCKER_REGISTRY}/warden-envelope-consumer:${PLATFORM_VERSION}
+    image: ${DOCKER_REGISTRY}/rom8726/warden-envelope-consumer:${PLATFORM_VERSION}
     container_name: warden-envelope-consumer
     env_file:
       - config.env
@@ -103,7 +103,7 @@ services:
       start_period: 60s
 
   warden-ingest-server:
-    image: ${DOCKER_REGISTRY}/warden-ingest-server:${PLATFORM_VERSION}
+    image: ${DOCKER_REGISTRY}/rom8726/warden-ingest-server:${PLATFORM_VERSION}
     container_name: warden-ingest-server
     env_file:
       - config.env
@@ -126,7 +126,7 @@ services:
       start_period: 60s
 
   warden-issue-notificator:
-    image: ${DOCKER_REGISTRY}/warden-issue-notificator:${PLATFORM_VERSION}
+    image: ${DOCKER_REGISTRY}/rom8726/warden-issue-notificator:${PLATFORM_VERSION}
     container_name: warden-issue-notificator
     env_file:
       - config.env
@@ -147,7 +147,7 @@ services:
       start_period: 60s
 
   warden-user-notificator:
-    image: ${DOCKER_REGISTRY}/warden-user-notificator:${PLATFORM_VERSION}
+    image: ${DOCKER_REGISTRY}/rom8726/warden-user-notificator:${PLATFORM_VERSION}
     container_name: warden-user-notificator
     env_file:
       - config.env
@@ -168,7 +168,7 @@ services:
       start_period: 60s
 
   warden-scheduler:
-    image: ${DOCKER_REGISTRY}/warden-scheduler:${PLATFORM_VERSION}
+    image: ${DOCKER_REGISTRY}/rom8726/warden-scheduler:${PLATFORM_VERSION}
     container_name: warden-scheduler
     env_file:
       - config.env
@@ -209,7 +209,7 @@ services:
       start_period: 30s
 
   warden-pgbouncer:
-    image: ${DOCKER_REGISTRY}/warden-pgbouncer:${PLATFORM_VERSION}
+    image: ${DOCKER_REGISTRY}/rom8726/warden-pgbouncer:${PLATFORM_VERSION}
     container_name: warden-pgbouncer
     restart: always
     environment:
@@ -305,7 +305,7 @@ services:
   # Additional consumers
 
   warden-envelope-consumer-2:
-    image: ${DOCKER_REGISTRY}/warden-envelope-consumer:${PLATFORM_VERSION}
+    image: ${DOCKER_REGISTRY}/rom8726/warden-envelope-consumer:${PLATFORM_VERSION}
     container_name: warden-envelope-consumer-2
     env_file:
       - config.env
@@ -332,7 +332,7 @@ services:
       start_period: 60s
 
   warden-envelope-consumer-3:
-    image: ${DOCKER_REGISTRY}/warden-envelope-consumer:${PLATFORM_VERSION}
+    image: ${DOCKER_REGISTRY}/rom8726/warden-envelope-consumer:${PLATFORM_VERSION}
     container_name: warden-envelope-consumer-3
     env_file:
       - config.env

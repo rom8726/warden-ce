@@ -19,26 +19,26 @@ docker-build-backend: ## Building Docker image for backend (scratch + curl)
 .PHONY: docker-push-backend
 docker-push-backend: docker-build-backend ## Tagging and pushing Docker image for backend
 	@echo "\nTagging Docker backend image..."
-	@docker tag warden-backend:latest $(DOCKER_REGISTRY)/warden-backend:latest
+	@docker tag warden-backend:latest $(DOCKER_REGISTRY)/rom8726/warden-backend:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Tagging FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@echo "\nPushing Docker backend image to Docker Registry..."
-	@docker push $(DOCKER_REGISTRY)/warden-backend:latest
+	@docker push $(DOCKER_REGISTRY)/rom8726/warden-backend:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Push FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@if [ -n "$(TOOL_VERSION)" ] && [ "$(TOOL_VERSION)" != "latest" ]; then \
 		echo "\nTagging Docker backend image with version $(TOOL_VERSION)..."; \
-		docker tag warden-backend:latest $(DOCKER_REGISTRY)/warden-backend:$(TOOL_VERSION); \
+		docker tag warden-backend:latest $(DOCKER_REGISTRY)/rom8726/warden-backend:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version tagging FAILED"${NOCOLOR} ; \
 			exit 1 ; \
 		fi; \
 		echo "\nPushing Docker backend image with version $(TOOL_VERSION) to Docker Registry..."; \
-		docker push $(DOCKER_REGISTRY)/warden-backend:$(TOOL_VERSION); \
+		docker push $(DOCKER_REGISTRY)/rom8726/warden-backend:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version push FAILED"${NOCOLOR} ; \
 			exit 1 ; \
@@ -63,26 +63,26 @@ docker-build-ingest-server: ## Building Docker image for ingest-server (scratch 
 .PHONY: docker-push-ingest-server
 docker-push-ingest-server: docker-build-ingest-server ## Tagging and pushing Docker image for ingest-server
 	@echo "\nTagging Docker ingest-server image..."
-	@docker tag warden-ingest-server:latest $(DOCKER_REGISTRY)/warden-ingest-server:latest
+	@docker tag warden-ingest-server:latest $(DOCKER_REGISTRY)/rom8726/warden-ingest-server:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Tagging FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@echo "\nPushing Docker ingest-server image to Docker Registry..."
-	@docker push $(DOCKER_REGISTRY)/warden-ingest-server:latest
+	@docker push $(DOCKER_REGISTRY)/rom8726/warden-ingest-server:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Push FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@if [ -n "$(TOOL_VERSION)" ] && [ "$(TOOL_VERSION)" != "latest" ]; then \
 		echo "\nTagging Docker ingest-server image with version $(TOOL_VERSION)..."; \
-		docker tag warden-ingest-server:latest $(DOCKER_REGISTRY)/warden-ingest-server:$(TOOL_VERSION); \
+		docker tag warden-ingest-server:latest $(DOCKER_REGISTRY)/rom8726/warden-ingest-server:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version tagging FAILED"${NOCOLOR} ; \
 			exit 1 ; \
 		fi; \
 		echo "\nPushing Docker ingest-server image with version $(TOOL_VERSION) to Docker Registry..."; \
-		docker push $(DOCKER_REGISTRY)/warden-ingest-server:$(TOOL_VERSION); \
+		docker push $(DOCKER_REGISTRY)/rom8726/warden-ingest-server:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version push FAILED"${NOCOLOR} ; \
 			exit 1 ; \
@@ -107,26 +107,26 @@ docker-build-envelope-consumer: ## Building Docker image for envelope-consumer (
 .PHONY: docker-push-envelope-consumer
 docker-push-envelope-consumer: docker-build-envelope-consumer ## Tagging and pushing Docker image for envelope-consumer
 	@echo "\nTagging Docker envelope-consumer image..."
-	@docker tag warden-envelope-consumer:latest $(DOCKER_REGISTRY)/warden-envelope-consumer:latest
+	@docker tag warden-envelope-consumer:latest $(DOCKER_REGISTRY)/rom8726/warden-envelope-consumer:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Tagging FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@echo "\nPushing Docker envelope-consumer image to Docker Registry..."
-	@docker push $(DOCKER_REGISTRY)/warden-envelope-consumer:latest
+	@docker push $(DOCKER_REGISTRY)/rom8726/warden-envelope-consumer:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Push FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@if [ -n "$(TOOL_VERSION)" ] && [ "$(TOOL_VERSION)" != "latest" ]; then \
 		echo "\nTagging Docker envelope-consumer image with version $(TOOL_VERSION)..."; \
-		docker tag warden-envelope-consumer:latest $(DOCKER_REGISTRY)/warden-envelope-consumer:$(TOOL_VERSION); \
+		docker tag warden-envelope-consumer:latest $(DOCKER_REGISTRY)/rom8726/warden-envelope-consumer:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version tagging FAILED"${NOCOLOR} ; \
 			exit 1 ; \
 		fi; \
 		echo "\nPushing Docker envelope-consumer image with version $(TOOL_VERSION) to Docker Registry..."; \
-		docker push $(DOCKER_REGISTRY)/warden-envelope-consumer:$(TOOL_VERSION); \
+		docker push $(DOCKER_REGISTRY)/rom8726/warden-envelope-consumer:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version push FAILED"${NOCOLOR} ; \
 			exit 1 ; \
@@ -151,26 +151,26 @@ docker-build-issue-notificator: ## Building Docker image for issue-notificator (
 .PHONY: docker-push-issue-notificator
 docker-push-issue-notificator: docker-build-issue-notificator ## Tagging and pushing Docker image for issue-notificator
 	@echo "\nTagging Docker issue-notificator image..."
-	@docker tag warden-issue-notificator:latest $(DOCKER_REGISTRY)/warden-issue-notificator:latest
+	@docker tag warden-issue-notificator:latest $(DOCKER_REGISTRY)/rom8726/warden-issue-notificator:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Tagging FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@echo "\nPushing Docker issue-notificator image to Docker Registry..."
-	@docker push $(DOCKER_REGISTRY)/warden-issue-notificator:latest
+	@docker push $(DOCKER_REGISTRY)/rom8726/warden-issue-notificator:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Push FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@if [ -n "$(TOOL_VERSION)" ] && [ "$(TOOL_VERSION)" != "latest" ]; then \
 		echo "\nTagging Docker issue-notificator image with version $(TOOL_VERSION)..."; \
-		docker tag warden-issue-notificator:latest $(DOCKER_REGISTRY)/warden-issue-notificator:$(TOOL_VERSION); \
+		docker tag warden-issue-notificator:latest $(DOCKER_REGISTRY)/rom8726/warden-issue-notificator:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version tagging FAILED"${NOCOLOR} ; \
 			exit 1 ; \
 		fi; \
 		echo "\nPushing Docker issue-notificator image with version $(TOOL_VERSION) to Docker Registry..."; \
-		docker push $(DOCKER_REGISTRY)/warden-issue-notificator:$(TOOL_VERSION); \
+		docker push $(DOCKER_REGISTRY)/rom8726/warden-issue-notificator:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version push FAILED"${NOCOLOR} ; \
 			exit 1 ; \
@@ -195,26 +195,26 @@ docker-build-user-notificator: ## Building Docker image for user-notificator (sc
 .PHONY: docker-push-user-notificator
 docker-push-user-notificator: docker-build-user-notificator ## Tagging and pushing Docker image for user-notificator
 	@echo "\nTagging Docker user-notificator image..."
-	@docker tag warden-user-notificator:latest $(DOCKER_REGISTRY)/warden-user-notificator:latest
+	@docker tag warden-user-notificator:latest $(DOCKER_REGISTRY)/rom8726/warden-user-notificator:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Tagging FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@echo "\nPushing Docker user-notificator image to Docker Registry..."
-	@docker push $(DOCKER_REGISTRY)/warden-user-notificator:latest
+	@docker push $(DOCKER_REGISTRY)/rom8726/warden-user-notificator:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Push FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@if [ -n "$(TOOL_VERSION)" ] && [ "$(TOOL_VERSION)" != "latest" ]; then \
 		echo "\nTagging Docker user-notificator image with version $(TOOL_VERSION)..."; \
-		docker tag warden-user-notificator:latest $(DOCKER_REGISTRY)/warden-user-notificator:$(TOOL_VERSION); \
+		docker tag warden-user-notificator:latest $(DOCKER_REGISTRY)/rom8726/warden-user-notificator:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version tagging FAILED"${NOCOLOR} ; \
 			exit 1 ; \
 		fi; \
 		echo "\nPushing Docker user-notificator image with version $(TOOL_VERSION) to Docker Registry..."; \
-		docker push $(DOCKER_REGISTRY)/warden-user-notificator:$(TOOL_VERSION); \
+		docker push $(DOCKER_REGISTRY)/rom8726/warden-user-notificator:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version push FAILED"${NOCOLOR} ; \
 			exit 1 ; \
@@ -239,26 +239,26 @@ docker-build-scheduler: ## Building Docker image for scheduler (scratch + curl)
 .PHONY: docker-push-scheduler
 docker-push-scheduler: docker-build-scheduler ## Tagging and pushing Docker image for scheduler
 	@echo "\nTagging Docker scheduler image..."
-	@docker tag warden-scheduler:latest $(DOCKER_REGISTRY)/warden-scheduler:latest
+	@docker tag warden-scheduler:latest $(DOCKER_REGISTRY)/rom8726/warden-scheduler:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Tagging FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@echo "\nPushing Docker scheduler image to Docker Registry..."
-	@docker push $(DOCKER_REGISTRY)/warden-scheduler:latest
+	@docker push $(DOCKER_REGISTRY)/rom8726/warden-scheduler:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Push FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@if [ -n "$(TOOL_VERSION)" ] && [ "$(TOOL_VERSION)" != "latest" ]; then \
 		echo "\nTagging Docker scheduler image with version $(TOOL_VERSION)..."; \
-		docker tag warden-scheduler:latest $(DOCKER_REGISTRY)/warden-scheduler:$(TOOL_VERSION); \
+		docker tag warden-scheduler:latest $(DOCKER_REGISTRY)/rom8726/warden-scheduler:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version tagging FAILED"${NOCOLOR} ; \
 			exit 1 ; \
 		fi; \
 		echo "\nPushing Docker scheduler image with version $(TOOL_VERSION) to Docker Registry..."; \
-		docker push $(DOCKER_REGISTRY)/warden-scheduler:$(TOOL_VERSION); \
+		docker push $(DOCKER_REGISTRY)/rom8726/warden-scheduler:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version push FAILED"${NOCOLOR} ; \
 			exit 1 ; \
@@ -282,27 +282,27 @@ docker-build-pgbouncer: ## Building Docker image for pgbouncer
 .PHONY: docker-push-pgbouncer
 docker-push-pgbouncer: docker-build-pgbouncer ## Tagging and pushing Docker image for pgbouncer
 	@echo "\nTagging Docker pgbouncer image..."
-	@docker tag warden-pgbouncer:latest $(DOCKER_REGISTRY)/warden-pgbouncer:latest
+	@docker tag warden-pgbouncer:latest $(DOCKER_REGISTRY)/rom8726/warden-pgbouncer:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Tagging FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 
 	@echo "\nPushing Docker pgbouncer image to Docker Registry..."
-	@docker push $(DOCKER_REGISTRY)/warden-pgbouncer:latest
+	@docker push $(DOCKER_REGISTRY)/rom8726/warden-pgbouncer:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Push FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@if [ -n "$(TOOL_VERSION)" ] && [ "$(TOOL_VERSION)" != "latest" ]; then \
 		echo "\nTagging Docker pgbouncer image with version $(TOOL_VERSION)..."; \
-		docker tag warden-pgbouncer:latest $(DOCKER_REGISTRY)/warden-pgbouncer:$(TOOL_VERSION); \
+		docker tag warden-pgbouncer:latest $(DOCKER_REGISTRY)/rom8726/warden-pgbouncer:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version tagging FAILED"${NOCOLOR} ; \
 			exit 1 ; \
 		fi; \
 		echo "\nPushing Docker pgbouncer image with version $(TOOL_VERSION) to Docker Registry..."; \
-		docker push $(DOCKER_REGISTRY)/warden-pgbouncer:$(TOOL_VERSION); \
+		docker push $(DOCKER_REGISTRY)/rom8726/warden-pgbouncer:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version push FAILED"${NOCOLOR} ; \
 			exit 1 ; \
@@ -333,26 +333,26 @@ docker-build-frontend-demo: ## Building Docker image frontend for demo
 .PHONY: docker-push-frontend
 docker-push-frontend: docker-build-frontend ## Tagging and pushing Docker image for frontend
 	@echo "\nTagging Docker frontend image..."
-	@docker tag warden-frontend:latest $(DOCKER_REGISTRY)/warden-frontend:latest
+	@docker tag warden-frontend:latest $(DOCKER_REGISTRY)/rom8726/warden-frontend:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Tagging FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@echo "\nPushing Docker frontend image to Docker Registry..."
-	@docker push $(DOCKER_REGISTRY)/warden-frontend:latest
+	@docker push $(DOCKER_REGISTRY)/rom8726/warden-frontend:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Push FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@if [ -n "$(TOOL_VERSION)" ] && [ "$(TOOL_VERSION)" != "latest" ]; then \
 		echo "\nTagging Docker frontend image with version $(TOOL_VERSION)..."; \
-		docker tag warden-frontend:latest $(DOCKER_REGISTRY)/warden-frontend:$(TOOL_VERSION); \
+		docker tag warden-frontend:latest $(DOCKER_REGISTRY)/rom8726/warden-frontend:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version tagging FAILED"${NOCOLOR} ; \
 			exit 1 ; \
 		fi; \
 		echo "\nPushing Docker frontend image with version $(TOOL_VERSION) to Docker Registry..."; \
-		docker push $(DOCKER_REGISTRY)/warden-frontend:$(TOOL_VERSION); \
+		docker push $(DOCKER_REGISTRY)/rom8726/warden-frontend:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version push FAILED"${NOCOLOR} ; \
 			exit 1 ; \
@@ -373,26 +373,26 @@ docker-build-reverse-proxy: ## Building Docker image for reverse-proxy
 .PHONY: docker-push-reverse-proxy
 docker-push-reverse-proxy: docker-build-reverse-proxy ## Tagging and pushing Docker image for reverse-proxy
 	@echo "\nTagging Docker reverse-proxy image..."
-	@docker tag warden-reverse-proxy:latest $(DOCKER_REGISTRY)/warden-reverse-proxy:latest
+	@docker tag warden-reverse-proxy:latest $(DOCKER_REGISTRY)/rom8726/warden-reverse-proxy:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Tagging FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@echo "\nPushing Docker reverse-proxy image to Docker Registry..."
-	@docker push $(DOCKER_REGISTRY)/warden-reverse-proxy:latest
+	@docker push $(DOCKER_REGISTRY)/rom8726/warden-reverse-proxy:latest
 	@if [ $$? -ne 0 ] ; then \
 		@echo -e ${RED}"Push FAILED"${NOCOLOR} ; \
 		exit 1 ; \
 	fi
 	@if [ -n "$(TOOL_VERSION)" ] && [ "$(TOOL_VERSION)" != "latest" ]; then \
 		echo "\nTagging Docker reverse-proxy image with version $(TOOL_VERSION)..."; \
-		docker tag warden-reverse-proxy:latest $(DOCKER_REGISTRY)/warden-reverse-proxy:$(TOOL_VERSION); \
+		docker tag warden-reverse-proxy:latest $(DOCKER_REGISTRY)/rom8726/warden-reverse-proxy:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version tagging FAILED"${NOCOLOR} ; \
 			exit 1 ; \
 		fi; \
 		echo "\nPushing Docker reverse-proxy image with version $(TOOL_VERSION) to Docker Registry..."; \
-		docker push $(DOCKER_REGISTRY)/warden-reverse-proxy:$(TOOL_VERSION); \
+		docker push $(DOCKER_REGISTRY)/rom8726/warden-reverse-proxy:$(TOOL_VERSION); \
 		if [ $$? -ne 0 ] ; then \
 			echo -e ${RED}"Version push FAILED"${NOCOLOR} ; \
 			exit 1 ; \
