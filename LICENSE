@@ -1,0 +1,37 @@
+Warden Business License (WBL)
+Version 1.0
+
+This license is a modified version of the Business Source License 1.1 (BSL), with no automatic license change.
+
+Licensor: Chudov Roman (roman.chudov@gmail.com)
+
+Licensed Work: The "Warden" error monitoring and analytics platform, including but not limited to its server, SDKs, and user interface components.
+
+Additional Use Grant: You may use the Licensed Work, free of charge, for development, evaluation, and internal use purposes, subject to the limitations and conditions set forth in this license.
+
+Change License: None. This software does not automatically transition to an Open Source license.
+
+License Grant:
+The Licensor hereby grants you the non-exclusive, worldwide, non-transferable right to use, copy, modify, and distribute the Licensed Work, only for the Licensed Purpose (see below), and only under the terms of this license.
+
+Licensed Purpose:
+You may use this software for internal business operations, development, testing, and academic research. You may not:
+- Use this software as part of a hosted or SaaS product that provides similar functionality.
+- Resell, relicense, or distribute the software as a competitive product or service.
+
+Commercial Use:
+For commercial distribution, SaaS offerings, or OEM integration, a separate commercial license is required. Please contact roman.chudov@gmail.com for licensing terms.
+
+Limitations:
+- No right is granted to remove or alter copyright notices.
+- You must not use the Licensed Work to create a product or service that is directly competitive with the Licensed Work.
+
+Disclaimer:
+THE LICENSED WORK IS PROVIDED "AS IS" AND WITHOUT WARRANTY OF ANY KIND. THE LICENSOR DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
+
+Limitation of Liability:
+IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE LICENSED WORK.
+
+---
+
+To obtain a commercial license for use beyond this agreement, contact: roman.chudov@gmail.com
