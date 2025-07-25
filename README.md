@@ -52,6 +52,64 @@ Warden is designed for teams and companies that need full control over their err
   - **Redis:** Caching and rate limiting.
 - **Docker-Ready:** Full dev and production setup via Docker Compose and multi-stage Dockerfile.
 
+## Deployment Instructions
+
+After reviewing the key features, you can deploy Warden using Docker Compose for production.  
+**Follow these steps:**
+
+1. **Copy the production Docker Compose file:**
+
+   Use the `docker-compose.yml` from the `prod` directory.
+
+2. **Prepare configuration files:**
+
+   Create the following files in `/opt/warden` (must be owned by `root`):
+
+   - `/opt/warden/platform.env` — platform settings
+   - `/opt/warden/config.env` — application configuration
+
+3. **Fill in `platform.env`:**
+
+   ```
+   DOMAIN=warden.your-company.tech         # Domain for the platform
+   DB_PASSWORD=your_postgres_password      # PostgreSQL password
+   CLICKHOUSE_DB_PASSWORD=your_ch_password # ClickHouse password
+   SSL_CERT=warden.crt                     # SSL certificate filename (should be in /opt/warden/nginx/ssl)
+   SSL_CERT_KEY=warden.key                 # SSL key filename (should be in /opt/warden/nginx/ssl)
+   PLATFORM_VERSION=latest                 # Platform version (e.g., v1.2.3 or latest)
+   ```
+
+4. **Fill in `config.env`:**
+
+   ```
+   WARDEN_FRONTEND_URL=https://warden.your-company.tech   # URL for emails and redirects
+   WARDEN_SECRET_KEY=your_very_secret_key                # 16 or 32 chars
+   WARDEN_JWT_SECRET_KEY=your_jwt_secret_key             # 16 or 32 chars
+   WARDEN_POSTGRES_PASSWORD=your_postgres_password       # Same as DB_PASSWORD in platform.env
+   WARDEN_CLICKHOUSE_PASSWORD=your_ch_password           # Same as CLICKHOUSE_DB_PASSWORD in platform.env
+   WARDEN_MAILER_ADDR=smtp.yandex.ru:465                 # SMTP server address
+   WARDEN_MAILER_USER=mailer_user                        # SMTP user
+   WARDEN_MAILER_PASSWORD=mailer_password                # SMTP password
+   WARDEN_MAILER_FROM=warden@your-company.tech           # Sender email
+   WARDEN_MAILER_USE_TLS=true                            # Use TLS (true/false)
+   WARDEN_MAILER_CERT_FILE=                              # (optional) Path to TLS cert
+   WARDEN_MAILER_KEY_FILE=                               # (optional) Path to TLS key
+   WARDEN_MAILER_ALLOW_INSECURE=false                    # Allow insecure certs (for self-signed)
+   WARDEN_ADMIN_EMAIL=admin@your-company.tech            # Platform admin email
+   WARDEN_ADMIN_TMP_PASSWORD=your_admin_temp_password    # Initial admin password
+   ```
+
+5. **Place SSL certificates:**
+
+   Place your SSL certificate and key files in `/opt/warden/nginx/ssl` with the names specified in `platform.env`.
+
+6. **Start the platform:**
+
+   ```bash
+   cd /opt/warden
+   docker compose --env-file platform.env up -d
+   ```
+
 ---
 
 ## Architecture & Components
