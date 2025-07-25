@@ -1,4 +1,4 @@
-import React, { type ReactNode, useState, useEffect } from 'react';
+import React, { type ReactNode, useState } from 'react';
 import { 
   Box, 
   AppBar, 
@@ -34,13 +34,13 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import LogoImg from './LogoImg';
 import ThemeToggle from './ThemeToggle';
 import Breadcrumbs from './Breadcrumbs';
 import SkipLink from './SkipLink';
 import AccessibilityMenu from './AccessibilityMenu';
 import NotificationPopover from './NotificationPopover';
 import { useNotifications } from '../hooks/useNotifications';
+import WardenLogo from "./WardenLogo.tsx";
 
 interface LayoutProps {
   children: ReactNode;
@@ -184,7 +184,7 @@ const Layout: React.FC<LayoutProps> = ({
             </IconButton>
           )}
 
-          <LogoImg size="medium" />
+          <WardenLogo logoSize={32} />
 
           <Box sx={{ flexGrow: 1 }} />
 
