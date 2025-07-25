@@ -1,1 +1,0 @@
-ALTER TABLE issues ALTER COLUMN fingerprint TYPE CHAR(40);
