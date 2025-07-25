@@ -20,6 +20,8 @@ services:
     volumes:
       - "./nginx/ssl:/etc/nginx/ssl"
     depends_on:
+      warden-backend:
+        condition: service_healthy
       warden-frontend:
         condition: service_healthy
       warden-ingest-server:
@@ -75,16 +77,6 @@ services:
         condition: service_healthy
       warden-kafka:
         condition: service_healthy
-      warden-envelope-consumer:
-        condition: service_healthy
-      warden-ingest-server:
-        condition: service_healthy
-      warden-issue-notificator:
-        condition: service_healthy
-      warden-user-notificator:
-        condition: service_healthy
-      warden-scheduler:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
       interval: 30s
@@ -109,6 +101,8 @@ services:
       warden-pgbouncer:
         condition: service_healthy
       warden-kafka:
+        condition: service_healthy
+      warden-backend:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
@@ -139,6 +133,8 @@ services:
         condition: service_healthy
       warden-ingest-server:
         condition: service_healthy
+      warden-backend:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
       interval: 30s
@@ -162,6 +158,8 @@ services:
         condition: service_healthy
       warden-pgbouncer:
         condition: service_healthy
+      warden-backend:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
       interval: 30s
@@ -184,6 +182,8 @@ services:
       warden-postgresql:
         condition: service_healthy
       warden-pgbouncer:
+        condition: service_healthy
+      warden-backend:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
@@ -209,6 +209,8 @@ services:
       warden-pgbouncer:
         condition: service_healthy
       warden-clickhouse:
+        condition: service_healthy
+      warden-backend:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "--silent", "http://localhost:8081/health"]
@@ -285,7 +287,7 @@ services:
       start_period: 30s
 
   warden-clickhouse:
-    image: clickhouse/clickhouse-server:latest
+    image: clickhouse/clickhouse-server:25.6.4
     container_name: warden-clickhouse
     environment:
       CLICKHOUSE_DB: warden
@@ -340,10 +342,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+      interval: 20s
+      timeout: 15s
+      retries: 10
+      start_period: 120s
 
   warden-kafka-ui:
     container_name: warden-kafka-ui
