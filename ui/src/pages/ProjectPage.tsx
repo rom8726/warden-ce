@@ -467,7 +467,7 @@ const ProjectPage: React.FC = () => {
     <Layout showBackButton={true} backTo="/dashboard">
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Box>
-          <Typography variant="h6" component="h1" gutterBottom>
+          <Typography variant="h6" component="h1" gutterBottom className="gradient-text">
             {project.name}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>
@@ -539,7 +539,7 @@ const ProjectPage: React.FC = () => {
       {mostFrequentIssues.length > 0 && (
         <Paper sx={{ mb: 3 }}>
           <Box sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 2 }} className="gradient-subtitle">
               Most Frequent Issues
             </Typography>
             <Grid container spacing={2}>

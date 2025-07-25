@@ -1,0 +1,52 @@
+/* Gradient text effect for Warden logo */
+.gradient-text {
+    background: linear-gradient(45deg, rgb(130, 82, 255), #FF5A8C);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Alternative gradient variations */
+.gradient-text-purple {
+    background: linear-gradient(45deg, rgb(130, 82, 255), rgb(150, 110, 255));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.gradient-text-blue {
+    background: linear-gradient(45deg, #3B82F6, #8B5CF6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.gradient-text-green {
+    background: linear-gradient(45deg, #10B981, #059669);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Hover effects */
+.gradient-text:hover {
+    background: linear-gradient(45deg, rgb(110, 62, 235), #E54A7C);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    transition: all 0.3s ease;
+}
+
+/* Animation for logo */
+@keyframes logoGlow {
+    0%, 100% {
+        filter: brightness(1);
+    }
+    50% {
+        filter: brightness(1.1);
+    }
+}
+
+.logo-animated {
+    animation: logoGlow 3s ease-in-out infinite;
+}

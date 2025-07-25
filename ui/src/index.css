@@ -65,3 +65,133 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* Gradient text styles for headings */
+.gradient-text {
+  background: linear-gradient(45deg, rgb(130, 82, 255), #FF5A8C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
+
+.gradient-text:hover {
+  background: linear-gradient(45deg, rgb(110, 62, 235), #E54A7C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-purple {
+  background: linear-gradient(45deg, rgb(130, 82, 255), rgb(150, 110, 255));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
+
+.gradient-text-purple:hover {
+  background: linear-gradient(45deg, rgb(110, 62, 235), rgb(130, 90, 235));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-blue {
+  background: linear-gradient(45deg, #3B82F6, #8B5CF6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
+
+.gradient-text-blue:hover {
+  background: linear-gradient(45deg, #2563EB, #7C3AED);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-green {
+  background: linear-gradient(45deg, #10B981, #059669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+}
+
+.gradient-text-green:hover {
+  background: linear-gradient(45deg, #059669, #047857);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gradient text styles for subtitles */
+.gradient-subtitle {
+  background: linear-gradient(45deg, rgb(130, 82, 255), #FF5A8C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.gradient-subtitle:hover {
+  background: linear-gradient(45deg, rgb(110, 62, 235), #E54A7C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 1;
+}
+
+.gradient-subtitle-purple {
+  background: linear-gradient(45deg, rgb(130, 82, 255), rgb(150, 110, 255));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.gradient-subtitle-purple:hover {
+  background: linear-gradient(45deg, rgb(110, 62, 235), rgb(130, 90, 235));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 1;
+}
+
+.gradient-subtitle-blue {
+  background: linear-gradient(45deg, #3B82F6, #8B5CF6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.gradient-subtitle-blue:hover {
+  background: linear-gradient(45deg, #2563EB, #7C3AED);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 1;
+}
+
+.gradient-subtitle-green {
+  background: linear-gradient(45deg, #10B981, #059669);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.gradient-subtitle-green:hover {
+  background: linear-gradient(45deg, #059669, #047857);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 1;
+}

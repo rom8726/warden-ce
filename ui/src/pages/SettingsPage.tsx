@@ -93,7 +93,7 @@ const SettingsPage: React.FC = () => {
 
   return (
     <AuthenticatedLayout>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom className="gradient-text">
         Settings
       </Typography>
 
@@ -104,7 +104,7 @@ const SettingsPage: React.FC = () => {
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         {/* 1. Account Information */}
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom className="gradient-subtitle">
             Account Information
           </Typography>
           {userLoading ? (
@@ -174,7 +174,7 @@ const SettingsPage: React.FC = () => {
 
         {/* 3. Your Teams */}
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom className="gradient-subtitle">
             Your Teams
           </Typography>
           {leaveError && <Alert severity="error" sx={{ mb: 2 }}>{leaveError}</Alert>}
@@ -261,7 +261,7 @@ const SettingsPage: React.FC = () => {
 
         {/* 5. Version Information */}
         <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h6" gutterBottom className="gradient-subtitle">
             Version Information
           </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -284,7 +284,7 @@ const SettingsPage: React.FC = () => {
         }}
         aria-labelledby="leave-team-dialog-title"
       >
-        <DialogTitle id="leave-team-dialog-title">
+        <DialogTitle id="leave-team-dialog-title" className="gradient-text">
           Leave Team
         </DialogTitle>
         <DialogContent>

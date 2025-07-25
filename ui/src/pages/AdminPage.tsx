@@ -485,13 +485,9 @@ const AdminPage: React.FC = () => {
           variant="h4"
           component="h1"
           gutterBottom
+          className="gradient-text-purple"
           sx={{
             fontWeight: 600,
-            background: (theme) => theme.palette.mode === 'dark'
-              ? 'linear-gradient(45deg, #8352ff 10%, #5e72e4 90%)'
-              : 'linear-gradient(45deg, #5e72e4 30%, #8352ff 90%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
             mb: 1
           }}
         >

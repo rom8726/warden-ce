@@ -80,7 +80,7 @@ const AddTeamMemberDialog: React.FC<AddTeamMemberDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={handleCancel} maxWidth="md" fullWidth>
-      <DialogTitle>Add User to Team</DialogTitle>
+      <DialogTitle className="gradient-text-purple">Add User to Team</DialogTitle>
       <DialogContent>
         <DialogContentText>
           Select a user and role to add to the team.

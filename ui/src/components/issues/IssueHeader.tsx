@@ -86,7 +86,7 @@ const IssueHeader = memo(({ issue, tags, onStatusChange, statusChangeLoading = f
     <Box sx={styles.headerContainer}>
       <Box sx={styles.headerTitleContainer}>
         {getLevelIcon(issue.level)}
-        <Typography variant="h4" component="h1" sx={styles.headerTitle}>
+        <Typography variant="h4" component="h1" sx={styles.headerTitle} className="gradient-text-blue">
           {issue.title}
         </Typography>
       </Box>

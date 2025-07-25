@@ -337,7 +337,7 @@ const ReleaseDetails: React.FC<ReleaseDetailsProps> = ({
 
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h6" gutterBottom className="gradient-subtitle-green">
         Release Details: {releaseDetails.version}
       </Typography>
 
@@ -393,7 +393,7 @@ const ReleaseDetails: React.FC<ReleaseDetailsProps> = ({
                 alignItems: 'center',
                 color: getFixTimeCardTextColor(),
                 fontWeight: 600
-              }}>
+              }} className="gradient-subtitle-green">
                 <BugReportIcon sx={{ mr: 1 }} />
                 Top Issues (5)
               </Typography>
@@ -512,7 +512,7 @@ const ReleaseDetails: React.FC<ReleaseDetailsProps> = ({
                 alignItems: 'center',
                 color: getFixTimeCardTextColor(),
                 fontWeight: 600
-              }}>
+              }} className="gradient-subtitle-green">
                 <PieChartIcon sx={{ mr: 1 }} />
                 Severity Distribution
               </Typography>
@@ -572,7 +572,7 @@ const ReleaseDetails: React.FC<ReleaseDetailsProps> = ({
                 alignItems: 'center',
                 color: getFixTimeCardTextColor(),
                 fontWeight: 600
-              }}>
+              }} className="gradient-subtitle-green">
                 <ScheduleIcon sx={{ mr: 1 }} />
                 Fix Time Performance
               </Typography>
@@ -856,7 +856,7 @@ const ReleaseDetails: React.FC<ReleaseDetailsProps> = ({
                 alignItems: 'center',
                 color: getFixTimeCardTextColor(),
                 fontWeight: 600
-              }}>
+              }} className="gradient-subtitle-green">
                 <GroupIcon sx={{ mr: 1 }} />
                 User Segments
               </Typography>

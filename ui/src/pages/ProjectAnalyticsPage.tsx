@@ -203,6 +203,8 @@ const ProjectAnalyticsPage: React.FC = () => {
         title="Project Analytics"
         subtitle="Project release analytics"
         icon={<AnalyticsIcon />}
+        gradientVariant="green"
+        subtitleGradientVariant="green"
       />
       
       <Box sx={{ mt: 2 }}>

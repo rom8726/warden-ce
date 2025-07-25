@@ -241,6 +241,7 @@ const TeamMembersManagement: React.FC<TeamMembersManagementProps> = ({
                 fontWeight: 600,
                 mr: 1
               }}
+              className="gradient-subtitle-purple"
             >
               Team Members - {team.team.name}
             </Typography>

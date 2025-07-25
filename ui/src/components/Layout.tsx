@@ -1,4 +1,4 @@
-import React, { type ReactNode, useState, useEffect } from 'react';
+import React, { type ReactNode, useState } from 'react';
 import { 
   Box, 
   AppBar, 
@@ -34,13 +34,13 @@ import {
 } from '@mui/icons-material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import LogoImg from './LogoImg';
 import ThemeToggle from './ThemeToggle';
 import Breadcrumbs from './Breadcrumbs';
 import SkipLink from './SkipLink';
 import AccessibilityMenu from './AccessibilityMenu';
 import NotificationPopover from './NotificationPopover';
 import { useNotifications } from '../hooks/useNotifications';
+import WardenLogo from "./WardenLogo.tsx";
 
 interface LayoutProps {
   children: ReactNode;
@@ -154,7 +154,6 @@ const Layout: React.FC<LayoutProps> = ({
             sx={{ 
               mr: 2, 
               display: { xs: 'none', sm: 'flex' },
-              color: theme.palette.mode === 'dark' ? 'inherit' : 'primary.main',
               '&:hover': {
                 backgroundColor: theme.palette.mode === 'dark' 
                   ? 'rgba(255, 255, 255, 0.08)' 
@@ -162,7 +161,7 @@ const Layout: React.FC<LayoutProps> = ({
               },
             }}
           >
-            <MenuIcon />
+            <MenuIcon className="gradient-text" />
           </IconButton>
 
           {showBackButton && (
@@ -171,7 +170,6 @@ const Layout: React.FC<LayoutProps> = ({
               aria-label="back"
               sx={{ 
                 mr: 2,
-                color: theme.palette.mode === 'dark' ? 'inherit' : 'primary.main',
                 '&:hover': {
                   backgroundColor: theme.palette.mode === 'dark' 
                     ? 'rgba(255, 255, 255, 0.08)' 
@@ -180,11 +178,11 @@ const Layout: React.FC<LayoutProps> = ({
               }}
               onClick={() => navigate(backTo)}
             >
-              <ArrowBackIcon />
+              <ArrowBackIcon className="gradient-text" />
             </IconButton>
           )}
 
-          <LogoImg size="medium" />
+          <WardenLogo logoSize={32} />
 
           <Box sx={{ flexGrow: 1 }} />
 
@@ -195,7 +193,6 @@ const Layout: React.FC<LayoutProps> = ({
                 aria-label="notifications"
                 onClick={handleNotificationOpen}
                 sx={{ 
-                  color: theme.palette.mode === 'dark' ? 'inherit' : 'primary.main',
                   '&:hover': {
                     backgroundColor: theme.palette.mode === 'dark' 
                       ? 'rgba(255, 255, 255, 0.08)' 
@@ -204,7 +201,7 @@ const Layout: React.FC<LayoutProps> = ({
                 }}
               >
                 <Badge badgeContent={unreadCount} color="error">
-                  <NotificationsIcon />
+                  <NotificationsIcon className="gradient-text" />
                 </Badge>
               </IconButton>
             </Tooltip>

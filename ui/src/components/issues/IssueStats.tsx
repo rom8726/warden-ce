@@ -20,7 +20,7 @@ const IssueStats = memo(({ issue, issueData }: IssueStatsProps) => {
         <Paper sx={styles.statsPaper}>
           <Box sx={styles.statsIconContainer}>
             <ScheduleIcon fontSize="small" sx={styles.statsIcon} />
-            <Typography variant="h6" component="h2">
+            <Typography variant="h6" component="h2" className="gradient-subtitle-blue">
               Occurrences
             </Typography>
           </Box>

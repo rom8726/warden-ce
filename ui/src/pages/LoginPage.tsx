@@ -12,10 +12,10 @@ import {
 } from '@mui/material';
 import { useAuth } from '../auth/AuthContext';
 import { Navigate, Link as RouterLink } from 'react-router-dom';
-import LogoImg from "../components/LogoImg.tsx";
 import OtpInput from 'react-otp-input';
 import { useTheme } from '@mui/material/styles';
 import { formatFrontendVersionForLogin } from '../utils/version';
+import WardenLogo from "../components/WardenLogo.tsx";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -89,7 +89,7 @@ const LoginPage: React.FC = () => {
           }}
         >
           <Box sx={{ mb: 4 }}>
-            <LogoImg size="large" />
+            <WardenLogo logoSize={58} showLink={false} variant={"h3"} />
           </Box>
 
           {error && (

@@ -116,7 +116,7 @@ const ChangeTeamMemberRoleDialog: React.FC<ChangeTeamMemberRoleDialogProps> = ({
       maxWidth="sm"
       fullWidth
     >
-      <DialogTitle>
+      <DialogTitle className="gradient-text-purple">
         Change Team Member Role
       </DialogTitle>
       

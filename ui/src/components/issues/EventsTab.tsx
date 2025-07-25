@@ -155,7 +155,7 @@ const EventDetailsModal = ({ event, open, onClose }: { event: IssueEvent | null,
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
-      <DialogTitle>
+      <DialogTitle className="gradient-text-blue">
         Event Details
         <IconButton
           aria-label="close"

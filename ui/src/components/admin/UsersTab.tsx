@@ -65,6 +65,7 @@ const UsersTab: React.FC<UsersTabProps> = ({
               fontWeight: 600,
               mb: 0.5
             }}
+            className="gradient-subtitle-purple"
           >
             Manage Users
           </Typography>

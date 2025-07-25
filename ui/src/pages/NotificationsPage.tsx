@@ -169,7 +169,7 @@ const NotificationsPage: React.FC = () => {
   return (
     <Box sx={{ p: 3, maxWidth: 1200, mx: 'auto' }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h4" component="h1">
+        <Typography variant="h4" component="h1" className="gradient-text-blue">
           Notifications
         </Typography>
         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>

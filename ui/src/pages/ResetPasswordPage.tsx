@@ -103,7 +103,7 @@ const ResetPasswordPage: React.FC = () => {
             <LogoImg size="large" />
           </Box>
 
-          <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
+          <Typography component="h1" variant="h5" sx={{ mb: 3 }} className="gradient-text">
             Reset Password
           </Typography>
 

@@ -70,7 +70,7 @@ const IssueChart = memo(({ timeRange, onTimeRangeChange, chartData}: IssueChartP
     return (
       <Paper sx={styles.chartContainer}>
         <Box sx={styles.chartHeader}>
-          <Typography variant="h6">
+          <Typography variant="h6" className="gradient-subtitle-blue">
             Occurrence Trend
           </Typography>
           <FormControl size="small" sx={{ minWidth: 120 }}>

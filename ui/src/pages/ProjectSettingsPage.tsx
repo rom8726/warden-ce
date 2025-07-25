@@ -191,7 +191,7 @@ const ProjectSettingsPage: React.FC = () => {
   return (
     <AuthenticatedLayout showBackButton={true} backTo={`/projects/${projectId}`}>
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography variant="h4" component="h1" gutterBottom className="gradient-text-purple">
           Project Settings: {project.name}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, whiteSpace: 'pre-line' }}>
@@ -231,7 +231,7 @@ const ProjectSettingsPage: React.FC = () => {
           <TabPanel value={tabValue} index={0}>
             <Box sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6" gutterBottom>
+                <Typography variant="h6" gutterBottom className="gradient-subtitle-purple">
                   General Settings
                 </Typography>
                 {!isEditing && (
@@ -300,7 +300,7 @@ const ProjectSettingsPage: React.FC = () => {
           {/* Notification Settings Tab */}
           <TabPanel value={tabValue} index={1}>
             <Box sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom className="gradient-subtitle-purple">
                 Notification Settings
               </Typography>
               <NotificationSettings projectId={Number(projectId)} />
@@ -310,7 +310,7 @@ const ProjectSettingsPage: React.FC = () => {
           {/* API Keys Tab */}
           <TabPanel value={tabValue} index={2}>
             <Box sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom className="gradient-subtitle-purple">
                 API Keys
               </Typography>
               <Typography variant="body1">
@@ -354,7 +354,7 @@ const ProjectSettingsPage: React.FC = () => {
           {/* Team Management Tab */}
           <TabPanel value={tabValue} index={3}>
             <Box sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
+              <Typography variant="h6" gutterBottom className="gradient-subtitle-purple">
                 Team Management
               </Typography>
               <Typography variant="body1" sx={{ mb: 3 }}>
