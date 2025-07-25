@@ -19,6 +19,7 @@ interface PageHeaderProps {
   loading?: boolean;
   children?: React.ReactNode;
   gradientVariant?: 'default' | 'purple' | 'blue' | 'green';
+  subtitleGradientVariant?: 'default' | 'purple' | 'blue' | 'green';
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({ 
@@ -28,7 +29,8 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   badge, 
   loading = false,
   children,
-  gradientVariant = 'default'
+  gradientVariant = 'default',
+  subtitleGradientVariant
 }) => {
   const theme = useTheme();
 
@@ -42,6 +44,21 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         return 'gradient-text-green';
       default:
         return 'gradient-text';
+    }
+  };
+
+  const getSubtitleGradientClass = () => {
+    if (!subtitleGradientVariant) return '';
+    
+    switch (subtitleGradientVariant) {
+      case 'purple':
+        return 'gradient-subtitle-purple';
+      case 'blue':
+        return 'gradient-subtitle-blue';
+      case 'green':
+        return 'gradient-subtitle-green';
+      default:
+        return 'gradient-subtitle';
     }
   };
 
@@ -114,7 +131,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         {subtitle && (
           <Typography 
             variant="body1" 
-            color="text.secondary"
+            className={getSubtitleGradientClass()}
             sx={{ 
               ml: icon ? 6 : 0,
               fontSize: '1rem',

@@ -87,6 +87,7 @@ const TeamsTab: React.FC<TeamsTabProps> = ({
               fontWeight: 600,
               mb: 0.5
             }}
+            className="gradient-subtitle-purple"
           >
             Manage Teams
           </Typography>
@@ -196,6 +197,7 @@ const TeamsTab: React.FC<TeamsTabProps> = ({
                 fontWeight: 600,
                 mb: 0.5
               }}
+              className="gradient-subtitle-purple"
             >
               Team Members
             </Typography>

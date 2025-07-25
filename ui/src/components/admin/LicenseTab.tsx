@@ -14,7 +14,7 @@ const LicenseTab: React.FC = () => {
   return (
     <Box>
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" component="h2" fontWeight={600}>
+        <Typography variant="h5" component="h2" fontWeight={600} className="gradient-text-purple">
           License Information
         </Typography>
       </Box>
@@ -22,7 +22,7 @@ const LicenseTab: React.FC = () => {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Box sx={{ mb: 3 }}>
-            <Typography variant="h6" gutterBottom fontWeight={600}>
+            <Typography variant="h6" gutterBottom fontWeight={600} className="gradient-subtitle-purple">
               Community Edition License
             </Typography>
             <Grid container spacing={2} alignItems="center">

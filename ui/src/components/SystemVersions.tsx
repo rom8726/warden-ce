@@ -102,7 +102,7 @@ export const SystemVersions: React.FC<SystemVersionsProps> = ({
 
   return (
     <Box>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h6" gutterBottom className="gradient-subtitle">
         System Components Versions
       </Typography>
       

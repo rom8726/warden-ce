@@ -176,7 +176,7 @@ const TwoFactorAuthSection: React.FC<TwoFactorAuthSectionProps> = ({ userData, u
 
   return (
     <Paper sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
+      <Typography variant="h6" gutterBottom className="gradient-subtitle">
         Two-Factor Authentication
       </Typography>
       {userLoading ? (

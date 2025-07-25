@@ -35,7 +35,7 @@ const BaseInfoPanel = memo(({ issueData }: BaseInfoPanelProps) => {
   return (
     <Paper sx={{ p: 1.5, height: '100%' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-        <Typography variant="h6" component="h2">
+        <Typography variant="h6" component="h2" className="gradient-subtitle-blue">
           Base Info
         </Typography>
       </Box>

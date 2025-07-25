@@ -539,7 +539,7 @@ const ProjectPage: React.FC = () => {
       {mostFrequentIssues.length > 0 && (
         <Paper sx={{ mb: 3 }}>
           <Box sx={{ p: 3 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 2 }} className="gradient-subtitle">
               Most Frequent Issues
             </Typography>
             <Grid container spacing={2}>

@@ -116,12 +116,13 @@ const AnalyticsPage: React.FC = () => {
         subtitle="Analytics for project releases and events."
         icon={<AnalyticsIcon />}
         gradientVariant="green"
+        subtitleGradientVariant="green"
       />
       <Breadcrumbs />
       
       {/* Analytics Summary Panel */}
       <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography variant="h6" gutterBottom className="gradient-subtitle-green">
           Overall Summary (Last 7 Days)
         </Typography>
         {isLoading ? (
@@ -204,7 +205,7 @@ const AnalyticsPage: React.FC = () => {
 
       {/* Projects List */}
       <Paper sx={{ p: 2, width: '100%', minWidth: '800px' }}>
-        <Typography variant="subtitle1" gutterBottom>
+        <Typography variant="subtitle1" gutterBottom className="gradient-subtitle-green">
           Projects for Analytics
         </Typography>
         {isLoading ? (

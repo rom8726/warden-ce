@@ -330,6 +330,7 @@ const IssuesPage: React.FC = () => {
         subtitle="View and manage issues across all your projects. Track errors, warnings, and information messages to improve your application's stability."
         icon={<IssuesIcon />}
         gradientVariant="blue"
+        subtitleGradientVariant="blue"
       />
 
       <Paper sx={{ mb: 2 }}>

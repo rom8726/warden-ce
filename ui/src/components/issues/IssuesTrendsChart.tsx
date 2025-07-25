@@ -64,7 +64,7 @@ const IssuesTrendsChart: React.FC<IssuesTrendsChartProps> = ({
   return (
     <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2, flexWrap: 'wrap', gap: 1 }}>
-        <Typography variant="h6" sx={{ fontWeight: 600 }}>{chartTitle}</Typography>
+        <Typography variant="h6" sx={{ fontWeight: 600 }} className="gradient-subtitle-blue">{chartTitle}</Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
           {showTimeRangeSelector && (
             <FormControl size="small" sx={{ minWidth: 120 }}>

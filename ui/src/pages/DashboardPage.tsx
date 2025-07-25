@@ -102,6 +102,7 @@ const DashboardPage: React.FC = () => {
         subtitle="Overview of your projects and issues."
         icon={<DashboardIcon />}
         gradientVariant="default"
+        subtitleGradientVariant="default"
       />
 
       <Grid container spacing={2}>
@@ -115,7 +116,7 @@ const DashboardPage: React.FC = () => {
               backdropFilter: 'blur(10px)',
               boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.05)'
             }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom className="gradient-subtitle">
               Recent Issues
             </Typography>
             {issuesLoading ? (
@@ -196,7 +197,7 @@ const DashboardPage: React.FC = () => {
               backdropFilter: 'blur(10px)',
               boxShadow: '0 4px 20px 0 rgba(0, 0, 0, 0.05)'
             }}>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" gutterBottom className="gradient-subtitle">
               Most Active Projects
             </Typography>
             {projectsLoading ? (
