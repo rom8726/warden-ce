@@ -154,19 +154,6 @@ const Layout: React.FC<LayoutProps> = ({
             sx={{ 
               mr: 2, 
               display: { xs: 'none', sm: 'flex' },
-              '& .MuiSvgIcon-root': {
-                background: 'linear-gradient(45deg, rgb(130, 82, 255), #FF5A8C)',
-                '-webkit-background-clip': 'text',
-                '-webkit-text-fill-color': 'transparent',
-                backgroundClip: 'text',
-                transition: 'all 0.3s ease',
-              },
-              '&:hover .MuiSvgIcon-root': {
-                background: 'linear-gradient(45deg, rgb(110, 62, 235), #E54A7C)',
-                '-webkit-background-clip': 'text',
-                '-webkit-text-fill-color': 'transparent',
-                backgroundClip: 'text',
-              },
               '&:hover': {
                 backgroundColor: theme.palette.mode === 'dark' 
                   ? 'rgba(255, 255, 255, 0.08)' 
@@ -174,7 +161,7 @@ const Layout: React.FC<LayoutProps> = ({
               },
             }}
           >
-            <MenuIcon />
+            <MenuIcon className="gradient-text" />
           </IconButton>
 
           {showBackButton && (
@@ -183,19 +170,6 @@ const Layout: React.FC<LayoutProps> = ({
               aria-label="back"
               sx={{ 
                 mr: 2,
-                '& .MuiSvgIcon-root': {
-                  background: 'linear-gradient(45deg, rgb(130, 82, 255), #FF5A8C)',
-                  '-webkit-background-clip': 'text',
-                  '-webkit-text-fill-color': 'transparent',
-                  backgroundClip: 'text',
-                  transition: 'all 0.3s ease',
-                },
-                '&:hover .MuiSvgIcon-root': {
-                  background: 'linear-gradient(45deg, rgb(110, 62, 235), #E54A7C)',
-                  '-webkit-background-clip': 'text',
-                  '-webkit-text-fill-color': 'transparent',
-                  backgroundClip: 'text',
-                },
                 '&:hover': {
                   backgroundColor: theme.palette.mode === 'dark' 
                     ? 'rgba(255, 255, 255, 0.08)' 
@@ -204,7 +178,7 @@ const Layout: React.FC<LayoutProps> = ({
               }}
               onClick={() => navigate(backTo)}
             >
-              <ArrowBackIcon />
+              <ArrowBackIcon className="gradient-text" />
             </IconButton>
           )}
 
@@ -219,19 +193,6 @@ const Layout: React.FC<LayoutProps> = ({
                 aria-label="notifications"
                 onClick={handleNotificationOpen}
                 sx={{ 
-                  '& .MuiSvgIcon-root': {
-                    background: 'linear-gradient(45deg, rgb(130, 82, 255), #FF5A8C)',
-                    '-webkit-background-clip': 'text',
-                    '-webkit-text-fill-color': 'transparent',
-                    backgroundClip: 'text',
-                    transition: 'all 0.3s ease',
-                  },
-                  '&:hover .MuiSvgIcon-root': {
-                    background: 'linear-gradient(45deg, rgb(110, 62, 235), #E54A7C)',
-                    '-webkit-background-clip': 'text',
-                    '-webkit-text-fill-color': 'transparent',
-                    backgroundClip: 'text',
-                  },
                   '&:hover': {
                     backgroundColor: theme.palette.mode === 'dark' 
                       ? 'rgba(255, 255, 255, 0.08)' 
@@ -240,7 +201,7 @@ const Layout: React.FC<LayoutProps> = ({
                 }}
               >
                 <Badge badgeContent={unreadCount} color="error">
-                  <NotificationsIcon />
+                  <NotificationsIcon className="gradient-text" />
                 </Badge>
               </IconButton>
             </Tooltip>
