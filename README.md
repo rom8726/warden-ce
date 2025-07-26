@@ -186,29 +186,26 @@ Warden follows a strict **Layered Clean Architecture**:
 
 ## Testing
 
-### Manual Testing
+Warden uses its own [testy](https://github.com/rom8726/testy) framework for functional API testing.
 
-For API testing, you can use curl:
+### Functional Testing
 
-```bash
-# Creating a project
-curl -k -X POST https://localhost/api/projects \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Test Project"}'
+**testy** is a declarative framework for testing HTTP APIs that allows:
 
-# Sending an event
-curl -k -X POST https://localhost/api/1/store/ \
-  -H "X-Sentry-Auth: Sentry sentry_key=YOUR_KEY, sentry_version=7" \
-  -H "Content-Type: application/json" \
-  -d '{"event_id":"12345", "message":"Test error", "level":"error"}'
-```
+- Writing tests in YAML format with scenario descriptions
+- Running tests through `http.Handler` with debugging capabilities (breakpoints)
+- Working with PostgreSQL fixtures via [pgfixtures](https://github.com/rom8726/pgfixtures)
+- Checking JSON responses, SQL queries, and external service mocks
+- Using templates, variables, and step chains
 
-### Automated Tests
-
-Running unit tests:
+### Running Tests
 
 ```bash
+# Unit tests
 make test
+
+# Functional tests
+make test.integration
 ```
 
 ---
