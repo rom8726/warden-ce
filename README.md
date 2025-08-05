@@ -1,4 +1,4 @@
-# Warden: Self-Hosted Sentry-Compatible Error Monitoring Platform
+# Warden Community Edition: Self-Hosted Sentry-Compatible Error Monitoring Platform
 
 <div align="center">
   <img src="docs/logo_full.png" alt="Warden Logo" height="150"/>
@@ -32,7 +32,7 @@ Warden provides a robust, extensible, and privacy-friendly solution for error tr
 
 ## About the Project
 
-Warden is designed for teams and companies that need full control over their error monitoring stack, data privacy, and the ability to customize or extend the platform. It is suitable for both small teams and large enterprises looking for a Sentry-compatible, on-premise solution.
+Warden is designed for teams and companies that need full control over their error monitoring stack, data privacy, and the ability to customize or extend the platform. Community Edition version is suitable for small teams and individual pet projects. There is also an Enterprise version of the project exist. To learn more, visit the [warden-project.tech](https://warden-project.tech) website.
 
 ---
 
