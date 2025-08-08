@@ -25,6 +25,64 @@ func (_m *MockIssuesRepository) EXPECT() *MockIssuesRepository_Expecter {
 	return &MockIssuesRepository_Expecter{mock: &_m.Mock}
 }
 
+// DeleteOld provides a mock function with given fields: ctx, maxAge, limit
+func (_m *MockIssuesRepository) DeleteOld(ctx context.Context, maxAge time.Duration, limit uint) (uint, error) {
+	ret := _m.Called(ctx, maxAge, limit)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteOld")
+	}
+
+	var r0 uint
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, time.Duration, uint) (uint, error)); ok {
+		return rf(ctx, maxAge, limit)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, time.Duration, uint) uint); ok {
+		r0 = rf(ctx, maxAge, limit)
+	} else {
+		r0 = ret.Get(0).(uint)
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, time.Duration, uint) error); ok {
+		r1 = rf(ctx, maxAge, limit)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockIssuesRepository_DeleteOld_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteOld'
+type MockIssuesRepository_DeleteOld_Call struct {
+	*mock.Call
+}
+
+// DeleteOld is a helper method to define mock.On call
+//   - ctx context.Context
+//   - maxAge time.Duration
+//   - limit uint
+func (_e *MockIssuesRepository_Expecter) DeleteOld(ctx interface{}, maxAge interface{}, limit interface{}) *MockIssuesRepository_DeleteOld_Call {
+	return &MockIssuesRepository_DeleteOld_Call{Call: _e.mock.On("DeleteOld", ctx, maxAge, limit)}
+}
+
+func (_c *MockIssuesRepository_DeleteOld_Call) Run(run func(ctx context.Context, maxAge time.Duration, limit uint)) *MockIssuesRepository_DeleteOld_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(time.Duration), args[2].(uint))
+	})
+	return _c
+}
+
+func (_c *MockIssuesRepository_DeleteOld_Call) Return(_a0 uint, _a1 error) *MockIssuesRepository_DeleteOld_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockIssuesRepository_DeleteOld_Call) RunAndReturn(run func(context.Context, time.Duration, uint) (uint, error)) *MockIssuesRepository_DeleteOld_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // FixTimesForRelease provides a mock function with given fields: ctx, projectID, release
 func (_m *MockIssuesRepository) FixTimesForRelease(ctx context.Context, projectID domain.ProjectID, release string) (map[string]time.Duration, error) {
 	ret := _m.Called(ctx, projectID, release)
