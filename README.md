@@ -182,6 +182,87 @@ Warden follows a strict **Layered Clean Architecture**:
    make dev-logs
    ```
 
+### Production Installation
+
+#### Option 1: Automated Installer (Recommended)
+
+For easy production deployment, use the bash installer located in the `prod` directory:
+
+1. **Copy the `prod` directory to your server**
+2. **Run the installer:**
+   ```bash
+   sudo ./quick_install.sh
+   ```
+3. **Follow the interactive prompts** to configure:
+   - Domain name
+   - Admin email
+   - SMTP settings
+   - SSL certificate options
+
+The installer will automatically:
+- Generate secure passwords and keys
+- Create necessary directories
+- Generate configuration files
+- Create SSL certificates (if needed)
+- Set up the complete environment
+
+#### Option 2: Manual Configuration
+
+For advanced users who prefer manual configuration, follow the [Deployment Instructions](#deployment-instructions) section above.
+
+---
+
+## Installer
+
+Warden provides two installation methods for production deployment:
+
+### Bash Installer (Recommended)
+
+The bash installer located in the `prod` directory provides an interactive, user-friendly installation experience:
+
+**Features:**
+- Interactive configuration collection
+- Automatic generation of secure passwords and keys
+- SSL certificate generation (self-signed or existing)
+- Directory structure creation
+- Configuration file generation
+- System requirements validation
+
+**Usage:**
+```bash
+# Copy the prod directory to your server
+# Run the installer
+sudo ./quick_install.sh
+
+# Run tests only
+sudo ./quick_install.sh --test
+
+# Show help
+./quick_install.sh --help
+```
+
+**What it does:**
+1. Validates system requirements (Docker, OpenSSL, etc.)
+2. Collects configuration via interactive prompts
+3. Generates random passwords and security keys
+4. Creates `/opt/warden` directory structure
+5. Generates `platform.env` and `config.env` files
+6. Copies `docker-compose.yml` and creates `Makefile`
+7. Generates SSL certificates (if needed)
+8. Provides post-installation instructions
+
+### Go Installer
+
+For users who prefer the Go-based installer, it's available in the `cmd/installer` and `internal/installer` directories:
+
+```bash
+# Build and run the Go installer
+go build -o installer cmd/installer/main.go
+sudo ./installer install
+```
+
+Both installers provide the same functionality, but the bash installer is more lightweight and doesn't require Go compilation.
+
 ---
 
 ## Testing
