@@ -963,6 +963,25 @@ WHERE i.project_id = $1
 	return result, nil
 }
 
+func (r *Repository) DeleteOld(ctx context.Context, maxAge time.Duration, limit uint) (uint, error) {
+	executor := r.getExecutor(ctx)
+	const query = `
+DELETE FROM issues
+WHERE id IN (
+    SELECT id
+    FROM issues
+    WHERE updated_at < (NOW() - $1::interval)
+    LIMIT $2
+)`
+
+	tag, err := executor.Exec(ctx, query, maxAge, limit)
+	if err != nil {
+		return 0, fmt.Errorf("exec update: %w", err)
+	}
+
+	return uint(tag.RowsAffected()), nil //nolint:gosec // it's ok
+}
+
 //nolint:ireturn // it's ok here
 func (r *Repository) getExecutor(ctx context.Context) db.Tx {
 	if tx := db.TxFromContext(ctx); tx != nil {

@@ -18,6 +18,7 @@ type IssuesRepository interface {
 		projectID domain.ProjectID,
 		release string,
 	) (map[string]time.Duration, error)
+	DeleteOld(ctx context.Context, maxAge time.Duration, limit uint) (uint, error)
 }
 
 type NotificationsQueueRepository interface {

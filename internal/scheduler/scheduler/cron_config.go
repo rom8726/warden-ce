@@ -33,3 +33,7 @@ type CronUserNotificationsCleaner struct{}
 func (*CronUserNotificationsCleaner) Schedule() string {
 	return "0 0 3 * * *" // Every day at 3 AM
 }
+
+type CronIssuesCleaner struct{}
+
+func (*CronIssuesCleaner) Schedule() string { return "0 0 4 * * *" }
