@@ -149,6 +149,7 @@ func (app *App) registerComponents() {
 	app.registerComponent(jobs.NewAnalyticsStats)
 	app.registerComponent(jobs.NewNotificationsQueueCleaner)
 	app.registerComponent(jobs.NewUserNotificationsCleaner)
+	app.registerComponent(jobs.NewIssuesCleanerJob)
 
 	// Resolve background scheduler
 	var schedulerSrv *scheduler.Scheduler
@@ -193,6 +194,14 @@ func (app *App) registerComponents() {
 		panic(err)
 	}
 	if err := schedulerSrv.Register(userNotifCleanerJob, &scheduler.CronUserNotificationsCleaner{}); err != nil {
+		panic(err)
+	}
+
+	var issuesCleanerJob *jobs.IssuesCleanerJob
+	if err := app.container.Resolve(&issuesCleanerJob); err != nil {
+		panic(err)
+	}
+	if err := schedulerSrv.Register(issuesCleanerJob, &scheduler.CronIssuesCleaner{}); err != nil {
 		panic(err)
 	}
 }
